@@ -106,7 +106,8 @@ body.cursor{cursor:default}
 .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
 .opt{all:unset;cursor:pointer;border:1px solid rgba(239,232,220,.3);padding:26px 28px;font-size:27px;line-height:1.35;color:var(--ivory);position:relative;transition:background .3s,border-color .3s}
 .opt .k{display:block;font-family:'JetBrains Mono';font-size:18px;letter-spacing:.2em;color:var(--red);margin-bottom:10px}
-.opt:hover,.opt.hot{background:rgba(192,26,34,.22);border-color:var(--red)}
+.opt:hover,.opt.hot{background:rgba(192,26,34,.22);border-color:var(--red);transform:translateY(-3px);box-shadow:0 10px 40px rgba(192,26,34,.25)}
+.opt{transition:background .3s,border-color .3s,transform .25s,box-shadow .3s}
 .opt.used{opacity:.4}
 .opt.used::after{content:attr(data-result);position:absolute;right:18px;top:20px;font-family:'JetBrains Mono';font-size:16px;letter-spacing:.2em;color:var(--red)}
 .live{position:absolute;right:120px;top:100px;font-family:'JetBrains Mono';font-size:22px;letter-spacing:.3em;color:#fff;display:flex;align-items:center;gap:14px}
@@ -592,6 +593,17 @@ const synth = {
     const n = noise(), lp = AC.createBiquadFilter(), ng = AC.createGain();
     lp.type = 'lowpass'; lp.frequency.value = 260; env(ng, t, 0.005, 0.8, 0.9);
     n.connect(lp).connect(ng).connect(master); n.start(t); n.stop(t + 1.2); },
+  // hover sounds for the three choices: each one hints at its body part
+  hoverPalms(){ const t = now();                       // a live-wire tick
+    const o = osc('sawtooth', 120), bp = AC.createBiquadFilter(), g = AC.createGain();
+    bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 6;
+    env(g, t, 0.002, 0.22, 0.12); o.connect(bp).connect(g).connect(master); o.start(t); o.stop(t + 0.16);
+    for (let i = 0; i < 3; i++){ const n = noise(), ng = AC.createGain(), ct = t + i * 0.035;
+      env(ng, ct, 0.001, 0.25, 0.012); n.connect(ng).connect(master); n.start(ct); n.stop(ct + 0.03); } },
+  hoverEyes(){ const t = now();                        // a thin glassy lens ping
+    [2637, 3951].forEach((f, i) => { const o = osc('sine', f), g = AC.createGain();
+      env(g, t + i * 0.05, 0.003, 0.07, 0.35); o.connect(g).connect(master); o.start(t + i * 0.05); o.stop(t + 0.5); }); },
+  hoverHeart(){ const t = now(); thump(t, 0.7); thump(t + 0.22, 0.4); },   // one heartbeat
   sting(){ const t = now();
     [1661, 1760, 1864.7, 2217].forEach((f, i) => { const o = osc('sine', f), g = AC.createGain();
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.025, t + 1.2 + i * 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 5);
@@ -825,6 +837,12 @@ function onKey(e){
 }
 
 document.querySelectorAll('.opt').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); choose(b.dataset.go); }));
+const HOVER = { 'b-palms': 'hoverPalms', 'b-eyes': 'hoverEyes', 'b-heart': 'hoverHeart' };
+document.querySelectorAll('.opt').forEach(b => b.addEventListener('mouseenter', () => {
+  if (!started || muted || cur.id !== 'choice') return;
+  const now_ = performance.now(); if (b._last && now_ - b._last < 250) return; b._last = now_;
+  synth[HOVER[b.dataset.go]]();
+}));
 stage.addEventListener('click', e => { if (e.button === 0) next(); });
 addEventListener('mousemove', () => { document.body.classList.add('cursor'); clearTimeout(window._ct); window._ct = setTimeout(() => document.body.classList.remove('cursor'), 1500); });
 addEventListener('keydown', onKey);
