@@ -490,7 +490,7 @@ const VO = {
   'patient-machine': { who:'You',          text:"i am a perfect machine." },
   'facility-end':    { who:'Facility',     text:"Thank you for your attention. Please return to your bag.", fac:true },
 };
-const SFX = ['hiss','zipper','flatline','buzz','glitch','boom','sting','shutdown','hit','heartroom','whoosh','trailer','bed'];
+const SFX = ['hiss','zipper','flatline','buzz','glitch','boom','sting','shutdown','hit','heartroom','whoosh','trailer','bed','hover-palms','hover-eyes','hover-heart'];
 
 function probe(name){
   const a = new Audio(); a.preload = 'auto';
@@ -593,17 +593,13 @@ const synth = {
     const n = noise(), lp = AC.createBiquadFilter(), ng = AC.createGain();
     lp.type = 'lowpass'; lp.frequency.value = 260; env(ng, t, 0.005, 0.8, 0.9);
     n.connect(lp).connect(ng).connect(master); n.start(t); n.stop(t + 1.2); },
-  // hover sounds for the three choices: each one hints at its body part
-  hoverPalms(){ const t = now();                       // a live-wire tick
-    const o = osc('sawtooth', 120), bp = AC.createBiquadFilter(), g = AC.createGain();
-    bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 6;
-    env(g, t, 0.002, 0.22, 0.12); o.connect(bp).connect(g).connect(master); o.start(t); o.stop(t + 0.16);
-    for (let i = 0; i < 3; i++){ const n = noise(), ng = AC.createGain(), ct = t + i * 0.035;
-      env(ng, ct, 0.001, 0.25, 0.012); n.connect(ng).connect(master); n.start(ct); n.stop(ct + 0.03); } },
-  hoverEyes(){ const t = now();                        // a thin glassy lens ping
-    [2637, 3951].forEach((f, i) => { const o = osc('sine', f), g = AC.createGain();
-      env(g, t + i * 0.05, 0.003, 0.07, 0.35); o.connect(g).connect(master); o.start(t + i * 0.05); o.stop(t + 0.5); }); },
-  hoverHeart(){ const t = now(); thump(t, 0.7); thump(t + 0.22, 0.4); },   // one heartbeat
+  // fallback hover clicks (the library files in audio/ normally play instead): dry, low, clinical
+  hoverPalms(){ const t = now(); for (let i = 0; i < 2; i++){ const n = noise(), bp = AC.createBiquadFilter(), g = AC.createGain(), ct = t + i * 0.05;
+      bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 4; env(g, ct, 0.001, 0.5, 0.025); n.connect(bp).connect(g).connect(master); n.start(ct); n.stop(ct + 0.05); } },
+  hoverEyes(){ const t = now(); const n = noise(), hp = AC.createBiquadFilter(), g = AC.createGain();
+      hp.type = 'highpass'; hp.frequency.value = 2500; env(g, t, 0.001, 0.35, 0.015); n.connect(hp).connect(g).connect(master); n.start(t); n.stop(t + 0.04);
+      blip(t, 190, 0.08, 0.2, 'square'); },
+  hoverHeart(){ const t = now(); thump(t, 0.6); },
   sting(){ const t = now();
     [1661, 1760, 1864.7, 2217].forEach((f, i) => { const o = osc('sine', f), g = AC.createGain();
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.025, t + 1.2 + i * 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 5);
@@ -841,7 +837,8 @@ const HOVER = { 'b-palms': 'hoverPalms', 'b-eyes': 'hoverEyes', 'b-heart': 'hove
 document.querySelectorAll('.opt').forEach(b => b.addEventListener('mouseenter', () => {
   if (!started || muted || cur.id !== 'choice') return;
   const now_ = performance.now(); if (b._last && now_ - b._last < 250) return; b._last = now_;
-  synth[HOVER[b.dataset.go]]();
+  const file = FILES['sfx-' + b.dataset.go.replace('b-', 'hover-')];
+  if (file){ const a = file.cloneNode(); a.volume = 0.9; a.play().catch(()=>{}); } else synth[HOVER[b.dataset.go]]();
 }));
 stage.addEventListener('click', e => { if (e.button === 0) next(); });
 addEventListener('mousemove', () => { document.body.classList.add('cursor'); clearTimeout(window._ct); window._ct = setTimeout(() => document.body.classList.remove('cursor'), 1500); });
