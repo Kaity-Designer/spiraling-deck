@@ -371,17 +371,11 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 13 END -->
-<section class="slide" id="end" data-time="25" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
- data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: Wake up again, thank you. Click 4: the closing film plays and then the credits. Backup Q&amp;A slides: press Q.">
+<section class="slide" id="end" data-next="credits" data-time="25" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
+ data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: Wake up again, thank you. Click 4: credits. Click 5: the concept film plays last. Backup Q&amp;A slides: press Q.">
   <div class="end-line step" data-do="vo:patient-machine">i am a perfect machine.</div>
   <div class="end-logo step" data-do="sfx:boom;flash;hideprev"><img src="assets/logo.png" alt="Spiraling"></div>
   <div class="end-thanks step" data-do="vo:facility-end"><h2 class="g">Wake up again.</h2><p>Thank you. Questions?</p></div>
-</section>
-
-<!-- TRAILER: closing film after the talk -->
-<section class="slide" id="trailer" data-time="0" data-next="credits" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
- data-notes="After the thank-you, no talking. The film plays (26s) and the deck moves on to the credits by itself. Take questions over it or after.">
-  <video class="bg" id="animatic" src="assets/trailer-drawn.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
 </section>
 
 <!-- APPENDIX -->
@@ -409,7 +403,7 @@ body.cursor{cursor:default}
     </div>
   </div>
 </section>
-<section class="slide qa" id="credits" data-title="Credits" data-speaker="Q&amp;A" data-h="0" data-drone="0" data-notes="Credits.">
+<section class="slide qa" id="credits" data-next="trailer" data-title="Credits" data-speaker="Q&amp;A" data-h="0" data-drone="0" data-notes="Credits.">
   <div class="pad">
     <div class="label">Credits</div>
     <h1 class="g" style="margin-top:24px">Spiraling</h1>
@@ -424,6 +418,13 @@ body.cursor{cursor:default}
     </div>
   </div>
 </section>
+
+<!-- TRAILER: closing film after the talk -->
+<section class="slide" id="trailer" data-time="0" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
+ data-notes="The very last thing: after the credits, the concept film plays (26s). No talking needed.">
+  <video class="bg" id="animatic" src="assets/trailer-drawn.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
+</section>
+
 
 <div id="sub"><div class="who"></div><div class="line"></div></div>
 <div id="num"></div>
