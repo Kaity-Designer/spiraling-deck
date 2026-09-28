@@ -838,7 +838,7 @@ document.querySelectorAll('.opt').forEach(b => b.addEventListener('mouseenter', 
   if (!started || muted || cur.id !== 'choice') return;
   const now_ = performance.now(); if (b._last && now_ - b._last < 250) return; b._last = now_;
   const file = FILES['sfx-' + b.dataset.go.replace('b-', 'hover-')];
-  if (file){ const a = file.cloneNode(); a.volume = 0.9; a.play().catch(()=>{}); } else synth[HOVER[b.dataset.go]]();
+  if (file){ const a = file.cloneNode(); a.volume = 0.6; a.play().catch(()=>{}); } else synth[HOVER[b.dataset.go]]();
 }));
 stage.addEventListener('click', e => { if (e.button === 0) next(); });
 addEventListener('mousemove', () => { document.body.classList.add('cursor'); clearTimeout(window._ct); window._ct = setTimeout(() => document.body.classList.remove('cursor'), 1500); });
