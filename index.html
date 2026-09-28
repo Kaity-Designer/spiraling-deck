@@ -661,9 +661,9 @@ function undo(cmds){
 const ACTIONS = {
   cold(){
     drawECG();
-    sfx('hiss');
-    later(() => heartStart(50), 2200);
-    later(() => vo('doctor-wake'), 6000);
+    heartStart(54);                       // the heart is the first thing you hear
+    later(() => sfx('hiss'), 700);
+    later(() => vo('doctor-wake'), 2600);
   },
   titleEnter(){ sfx('hit'); },
   settingEnter(){ sfx('whoosh', 0.8); },
