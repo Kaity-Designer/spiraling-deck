@@ -287,7 +287,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- BRANCH: EYES (death) -->
-<section class="slide branch" id="b-eyes" data-sub="top" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
+<section class="slide branch" id="b-eyes" data-sub="top" data-autoplay="6300,8300,10200,12400" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
  data-notes="DEATH. Build it slowly. Click 1: the eye changes. Click 2: 'You can see the power lines through the walls.' Click 3: whiteout. Then advance to death.">
   <div class="xfade" id="eyesx"><img src="assets/eye-human.jpg" alt=""><img class="top" src="assets/eye-modified.jpg" alt=""></div>
   <div class="whiteout" id="whiteout"></div>
@@ -730,6 +730,14 @@ function show(el, opts = {}){
     const auto = Math.min(parseInt(el.dataset.auto || 0), steps.length);
     for (let i = 0; i < auto; i++){ steps[i].style.transitionDelay = (0.25 + i * 0.35) + 's'; steps[i].classList.add('on'); run(steps[i].dataset.do); }
     step = auto;
+    // data-autoplay="ms,ms,...": the slide advances itself at these times (one entry per click, the last one leaves the slide).
+    // Each timer only fires if nobody has clicked past that point already, so pressing space never double-skips.
+    if (started && el.dataset.autoplay){
+      el.dataset.autoplay.split(',').map(Number).forEach((ms, i) => {
+        const expect = auto + i;
+        later(() => { if (cur === el && step === expect) next(); }, ms);
+      });
+    }
   }
   quiet = false;
   byId('num').textContent = main.includes(el) ? String(main.indexOf(el)).padStart(2, '0') : '';
