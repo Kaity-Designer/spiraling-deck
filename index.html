@@ -257,7 +257,7 @@ body.cursor{cursor:default}
 
 <!-- 06 CHOICE -->
 <section class="slide" id="choice" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
- data-notes="LIVE. Tell the room: 'You are the patient. Choose.' Katia counts hands. Press 1, 2 or 3 (or click). Eyes = death, then you come back here and they choose again. Heart = memory, then back here. Palms = progress and the deck moves on. If you are short on time press RIGHT to skip ahead.">
+ data-notes="LIVE. Tell the room: 'You are the patient. Choose.' Katia counts hands. Press 1, 2 or 3 (or click). Eyes = death, then you come back here and they choose again. Heart = memory, then back here. Palms = progress and the deck moves on to Look and feel. If you are short on time press RIGHT to skip ahead to Look and feel.">
   <img class="bg" src="assets/opening-still.jpg" alt="" style="filter:brightness(.55)">
   <div class="live"><i></i>YOU ARE THE PATIENT</div>
   <div class="vn-box">
@@ -272,7 +272,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- BRANCH: PALMS (progress) -->
-<section class="slide branch" id="b-palms" data-auto="3" data-title="Branch: palms" data-speaker="Kait" data-h="0.44" data-drone="0.45" data-enter="palmsEnter" data-next="setting"
+<section class="slide branch" id="b-palms" data-auto="3" data-title="Branch: palms" data-speaker="Kait" data-h="0.44" data-drone="0.45" data-enter="palmsEnter" data-next="look"
  data-notes="PROGRESS. The palms change, the current hums. 'Now you can touch live wires and feel where the current wants to go. Without the modification, the same wire kills you.'">
   <div class="xfade" id="palmsx"><img src="assets/palms-human.jpg" alt=""><img class="top" src="assets/palms-nano.jpg" alt=""></div>
   <div class="shade-b"></div>
@@ -330,49 +330,9 @@ body.cursor{cursor:default}
   <div class="credit">Original concept art: Katia</div>
 </section>
 
-<!-- 07 SETTING -->
-<section class="slide setting" id="setting" data-enter="settingEnter" data-auto="3" data-title="Setting" data-speaker="Katia" data-h="0.56" data-drone="0.4"
- data-notes="KATIA. Setting. 'The hospital is a body. The facility promises ascent to godhood, but you descend.' Click through the five strata. Keep it moving.">
-  <img class="bg" src="assets/cutaway.jpg" alt="" style="left:38%;width:62%">
-  <div style="position:absolute;inset:0;background:linear-gradient(90deg,var(--ink) 38%,rgba(10,9,9,0) 58%)"></div>
-  <div class="pad">
-    <div class="label step">Setting</div>
-    <h1 class="g step" style="margin-top:30px">The hospital is a body.</h1>
-    <p class="step" style="font-size:32px;color:var(--bone);font-weight:300;max-width:740px;margin-top:26px;line-height:1.35">A Gothic medical shrine that promises ascent. To escape, you descend through its organs.</p>
-    <div class="strata">
-      <div class="step"><span>01</span><div><b>Perception</b> observation wards and archives</div></div>
-      <div class="step"><span>02</span><div><b>Circulation</b> the pump chapel</div></div>
-      <div class="step"><span>03</span><div><b>Filtration</b> fluid cisterns</div></div>
-      <div class="step"><span>04</span><div><b>Recycling</b> discarded implants</div></div>
-      <div class="step"><span>05</span><div><b>Foundation</b> the core</div></div>
-    </div>
-  </div>
-  <div class="credit">Level concept, AI-assisted</div>
-</section>
-
-<!-- 08 FIRST PERSON -->
-<section class="slide" id="views" data-auto="2" data-title="From the patient's eyes" data-speaker="Katia" data-h="0.6" data-drone="0.45"
- data-notes="KATIA. One sentence: 'Everything is first person. You only ever see the facility from inside your own body.'">
-  <img class="bg kb" src="assets/level-views.jpg" alt="">
-  <div class="shade-b"></div>
-  <div class="outcome"><div class="label step">First person</div><h2 class="g step" style="margin-top:16px">You only ever see it from inside your body.</h2></div>
-  <div class="credit">Level concept, AI-assisted</div>
-</section>
-
-<!-- 09 CHARACTERS -->
-<section class="slide" id="chars" data-auto="1" data-title="Characters" data-speaker="Katia" data-h="0.66" data-drone="0.4"
- data-notes="KATIA. Patient first, then the Doctor. The Doctor is the heart of the horror: she is kind, and that is the problem.">
-  <div class="chars">
-    <figure><img src="assets/patient.jpg" alt=""><div class="shade-b"></div>
-      <figcaption class="step"><div class="label">The Patient</div><h2 class="g" style="margin-top:14px">A body to be improved.</h2><p>Fully human when he wakes. Every choice is carved into him. His locket is the last link to the life before the bag.</p></figcaption></figure>
-    <figure><img src="assets/doctor-scene.jpg" alt=""><div class="shade-b"></div>
-      <figcaption class="step" data-do="vo:doctor-care"><div class="label">The Doctor</div><h2 class="g" style="margin-top:14px">Gentle. Precise. Certain.</h2><p>An elderly clinician who holds the promise of recovery. With her, care and control are impossible to separate.</p></figcaption></figure>
-  </div>
-</section>
-
 <!-- 10 LOOK -->
-<section class="slide look" id="look" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
- data-notes="KATIA. Talk about the art direction in your own words: stylised, sculptural, drawn texture. Beauty that feels wrong.">
+<section class="slide look" id="look" data-enter="settingEnter" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
+ data-notes="KATIA. Your section. Talk about the art direction in your own words: stylised, sculptural, drawn texture. Beauty that feels wrong.">
   <div class="pad">
     <div class="label step">Look and feel</div>
     <h1 class="g step" style="margin-top:26px">Beauty that feels wrong.</h1>
@@ -827,7 +787,7 @@ function onKey(e){
   else if (k === 'b' || k === 'B') byId('black').classList.toggle('on');
   else if (k === 'f' || k === 'F'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
   else if (k === 'p' || k === 'P') openPresenter();
-  else if (k === 's' || k === 'S') go(byId('setting'));
+  else if (k === 's' || k === 'S') go(byId('look'));
   else if (k === 'q' || k === 'Q') go(byId('qa-death'), { back:true });
   else if (k === 'Home'){ window.location.hash = ''; location.reload(); }
 }
@@ -922,7 +882,7 @@ function updatePresenter(){
     <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}</div>
     <p style="font-size:22px;margin-top:18px">${cur.dataset.notes || ''}</p>
     <div style="color:#888;margin-top:24px">NEXT: ${n ? n.dataset.title : (cur.id === 'choice' ? 'press 1 / 2 / 3' : 'end')}</div>
-    <div style="color:#555;font-size:13px;margin-top:30px">SPACE next · ← undo click · shift+← previous slide · 1/2/3 choose · S skip to setting · Q backup Q&amp;A · M mute · B black · F fullscreen</div>`;
+    <div style="color:#555;font-size:13px;margin-top:30px">SPACE next · ← undo click · shift+← previous slide · 1/2/3 choose · S skip to look &amp; feel · Q backup Q&amp;A · M mute · B black · F fullscreen</div>`;
 }
 
 show(byId(location.hash.slice(1)) || byId('cold'));
