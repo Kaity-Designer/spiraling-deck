@@ -314,8 +314,9 @@ body.cursor{cursor:default}
 <!-- WAKE -->
 <section class="slide branch" id="wake" data-sub="top" data-auto="1" data-title="Wake again" data-speaker="Kait" data-h="0.52" data-drone="0.55" data-enter="wakeEnter" data-next="choice"
  data-notes="Zipper opens. 'And you wake up. Again.' Advance to choose again: the dead option is crossed out.">
-  <img class="bg kb" src="assets/opening-still.jpg" alt="">
+  <img class="bg kb" src="assets/doctor-choice-clean.jpg" alt="" style="object-position:center 30%;filter:brightness(.7) contrast(1.05)">
   <div class="shade-b"></div>
+  <div class="credit">Original concept art: Katia</div>
   <div class="outcome"><h2 class="g step">Try again.</h2><p class="step">You remember a little more.</p></div>
 </section>
 
@@ -848,7 +849,8 @@ function drawSpiral(){
   svg.querySelectorAll('g').forEach(g => g.remove());
   const cx = 430, cy = 430, turns = 2.6, a = 20, b = 52; let d = '';
   const pt = th => [cx + (a + b * th / (Math.PI)) * Math.cos(th), cy + (a + b * th / (Math.PI)) * Math.sin(th)];
-  for (let th = 0; th <= turns * 2 * Math.PI; th += 0.05){ const [x, y] = pt(th); d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+  // drawn from the outer edge inward, so the line spirals down into the centre
+  for (let th = turns * 2 * Math.PI; th >= 0; th -= 0.05){ const [x, y] = pt(th); d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
   path.setAttribute('d', d);
   const labels = ['WAKE', 'CHOOSE', 'EXPLORE', 'CONSEQUENCE', 'LEARN OR DIE'];
   const ns = 'http://www.w3.org/2000/svg';
