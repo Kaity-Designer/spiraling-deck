@@ -370,18 +370,18 @@ body.cursor{cursor:default}
   </div>
 </section>
 
-<!-- 12 TRAILER -->
-<section class="slide" id="trailer" data-time="35" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
- data-notes="Say nothing. 32 seconds. The deck moves on to the end slide by itself when the video finishes.">
-  <video class="bg" id="animatic" src="assets/animatic.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
-</section>
-
 <!-- 13 END -->
 <section class="slide" id="end" data-time="25" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
- data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: 'Thank you.' Then questions. Backup slides follow if they ask about death or humanity.">
+ data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: Wake up again, thank you. Click 4: the closing film plays and then the credits. Backup Q&amp;A slides: press Q.">
   <div class="end-line step" data-do="vo:patient-machine">i am a perfect machine.</div>
   <div class="end-logo step" data-do="sfx:boom;flash;hideprev"><img src="assets/logo.png" alt="Spiraling"></div>
   <div class="end-thanks step" data-do="vo:facility-end"><h2 class="g">Wake up again.</h2><p>Thank you. Questions?</p></div>
+</section>
+
+<!-- TRAILER: closing film after the talk -->
+<section class="slide" id="trailer" data-time="0" data-next="credits" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
+ data-notes="After the thank-you, no talking. The film plays (26s) and the deck moves on to the credits by itself. Take questions over it or after.">
+  <video class="bg" id="animatic" src="assets/trailer-drawn.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
 </section>
 
 <!-- APPENDIX -->
