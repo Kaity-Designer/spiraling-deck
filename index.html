@@ -409,7 +409,7 @@ body.cursor{cursor:default}
 <!-- 12 TRAILER -->
 <section class="slide" id="trailer" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
  data-notes="Say nothing. 32 seconds. The deck moves on to the end slide by itself when the video finishes.">
-  <video class="bg" id="animatic" src="assets/animatic.mp4" playsinline style="object-fit:contain;background:#000"></video>
+  <video class="bg" id="animatic" src="assets/animatic.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
 </section>
 
 <!-- 13 END -->
@@ -516,16 +516,22 @@ function noise(){ const s = AC.createBufferSource(); s.buffer = noiseBuf; s.loop
 function osc(type, f){ const o = AC.createOscillator(); o.type = type; o.frequency.value = f; return o; }
 
 function thump(t, vol){
-  const o = osc('sine', 70), g = AC.createGain();
-  o.frequency.setValueAtTime(72, t); o.frequency.exponentialRampToValueAtTime(36, t + 0.16);
-  env(g, t, 0.006, vol, 0.24); o.connect(g).connect(master); o.start(t); o.stop(t + 0.35);
+  const o = osc('sine', 110), g = AC.createGain();
+  o.frequency.setValueAtTime(115, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.09);
+  env(g, t, 0.002, vol, 0.2); o.connect(g).connect(master); o.start(t); o.stop(t + 0.3);
+  // attack click: this is the part laptop and projector speakers actually reproduce
+  const n = noise(), lp = AC.createBiquadFilter(), ng = AC.createGain();
+  lp.type = 'lowpass'; lp.frequency.value = 900;
+  env(ng, t, 0.001, vol * 0.35, 0.03); n.connect(lp).connect(ng).connect(master); n.start(t); n.stop(t + 0.06);
 }
 function blip(t, f, vol, dur, type){
   const o = osc(type || 'square', f), g = AC.createGain(), lp = AC.createBiquadFilter();
   lp.type = 'lowpass'; lp.frequency.value = 3200;
   env(g, t, 0.003, vol, dur); o.connect(lp).connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
 }
+const beatTimes = [];
 function beat(t){
+  beatTimes.push(t); if (beatTimes.length > 8) beatTimes.shift();
   const human = 1 - heart.h;
   if (human > 0.03){ thump(t, 0.85 * human + 0.05); thump(t + 0.27, 0.5 * human + 0.03); }
   if (heart.h > 0.03){ blip(t, 1000, 0.14 * heart.h, 0.07, heart.h > 0.7 ? 'square' : 'sine'); }
@@ -698,7 +704,15 @@ const ACTIONS = {
   deathEnter(){ heartStop(); drone(0); const f = byId('flat'); f.classList.remove('on'); void f.offsetWidth; later(() => { f.classList.add('on'); sfx('flatline'); }, 400); },
   wakeEnter(){ sfx('zipper'); later(() => heartStart(64), 900); },
   heartEnter(){ heartStop(); later(() => sfx('heartroom'), 300); later(() => { heart.h = Math.min(1, heart.h + 0.25); heartStart(58); }, 3800); },
-  trailerEnter(){ const v = byId('animatic'); v.currentTime = 0; v.play().catch(()=>{}); sfx('trailer', 0.9); },
+  trailerEnter(){
+    const v = byId('animatic'); v.muted = true; v.currentTime = 0;
+    const tryPlay = () => v.play().catch(() => later(tryPlay, 300));
+    tryPlay();
+    sfx('trailer', 0.9);
+    // backup: if the browser never reports "ended", move on anyway once the running time is up
+    const dur = (isFinite(v.duration) && v.duration > 0 ? v.duration : 32) * 1000;
+    later(() => { if (cur && cur.id === 'trailer') next(); }, dur + 800);
+  },
   endEnter(){ later(() => { heartStop(); }, 200); },
 };
 
@@ -718,7 +732,7 @@ function show(el, opts = {}){
   el.classList.add('active');
   setTimeout(() => el.classList.remove('cut'), 50);
   el.querySelectorAll('.kb').forEach(i => { i.style.animation = 'none'; void i.offsetWidth; i.style.animation = ''; });
-  el.querySelectorAll('video[muted]').forEach(v => { v.currentTime = 0; v.play().catch(()=>{}); });
+  el.querySelectorAll('video[muted]:not(#animatic)').forEach(v => { v.currentTime = 0; v.play().catch(()=>{}); });
   const h = parseFloat(el.dataset.h || 0);
   stage.style.setProperty('--h', h);
   heart.h = Math.max(heart.h, h * 0.9);
@@ -824,13 +838,18 @@ function drawECG(){
   const c = byId('ecg'), x = c.getContext('2d'); let px = 0; const W = 1920, H = 300, mid = H / 2;
   x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
   const pts = [];
-  function y(i){ const bpm = heart.on ? heart.bpm : 0; if (!bpm) return mid;
-    const p = (performance.now() / 1000) % (60 / bpm) / (60 / bpm);
-    if (p < 0.04) return mid - Math.sin(p / 0.04 * Math.PI) * 14;
-    if (p > 0.1 && p < 0.12) return mid + 18;
-    if (p > 0.12 && p < 0.15) return mid - 120 * (1 - Math.abs(p - 0.135) / 0.015);
-    if (p > 0.15 && p < 0.17) return mid + 30;
-    if (p > 0.3 && p < 0.4) return mid - Math.sin((p - 0.3) / 0.1 * Math.PI) * 22;
+  // the trace follows the scheduled beats, corrected for the speaker latency: spike = what you hear
+  function y(){
+    if (!AC || !heart.on) return mid + (Math.random() - 0.5) * 1.5;
+    const heard = AC.currentTime - (AC.outputLatency || AC.baseLatency || 0);
+    let b = null; for (const t of beatTimes) if (t <= heard) b = t;
+    if (b === null) return mid + (Math.random() - 0.5) * 1.5;
+    const dt = heard - b;                       // seconds since the thump was heard
+    if (dt < 0.012) return mid + 16 * (dt / 0.012);
+    if (dt < 0.03) return mid - 125 * Math.sin((dt - 0.012) / 0.018 * Math.PI);
+    if (dt < 0.05) return mid + 26 * Math.sin((dt - 0.03) / 0.02 * Math.PI);
+    if (dt > 0.27 && dt < 0.3) return mid - 45 * Math.sin((dt - 0.27) / 0.03 * Math.PI);   // the second, softer beat
+    if (dt > 0.45 && dt < 0.6) return mid - 18 * Math.sin((dt - 0.45) / 0.15 * Math.PI);
     return mid + (Math.random() - 0.5) * 1.5; }
   let last = mid;
   (function frame(){
