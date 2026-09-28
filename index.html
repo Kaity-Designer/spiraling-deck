@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spiraling</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --ink:#0a0909; --char:#141212; --ivory:#efe8dc; --bone:#d9d0c1;
+  --red:#c01a22; --blood:#7a0b10; --brown:#6b4a36; --mute:#8d857c;
+  --h:0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden;cursor:none}
+body.cursor{cursor:default}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;background:var(--ink);overflow:hidden;transform-origin:center center;
+  font-family:Inter,system-ui,sans-serif;color:var(--ivory)}
+.g{font-family:'Grenze Gotisch',serif;font-weight:600;letter-spacing:-.01em;line-height:1.02}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.04em}
+.label{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .8s ease,visibility 0s linear .8s}
+.slide.active{opacity:1;visibility:visible;transition:opacity .8s ease}
+.slide.cut{transition:none!important}
+.step{opacity:0;transform:translateY(14px);transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.1,1)}
+.step.on{opacity:1;transform:none}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.shade-l{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,7,7,.96) 0%,rgba(8,7,7,.82) 38%,rgba(8,7,7,0) 72%)}
+.shade-b{position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,7,7,.95) 0%,rgba(8,7,7,.2) 45%,rgba(8,7,7,0) 70%)}
+.pad{position:absolute;left:120px;top:110px;right:120px;bottom:110px}
+.credit{position:absolute;right:48px;bottom:36px;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.14em;color:rgba(239,232,220,.55);text-transform:uppercase}
+
+/* the humanity decay: grows slide by slide */
+#stage h1,#stage h2{text-shadow:calc(var(--h)*4px) 0 rgba(255,20,40,.45),calc(var(--h)*-4px) 0 rgba(0,220,255,.28)}
+#scan{position:absolute;inset:0;pointer-events:none;z-index:50;opacity:calc(var(--h)*.22);
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.5) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+#grain{position:absolute;inset:-100px;pointer-events:none;z-index:51;opacity:.09;animation:grain .6s steps(4) infinite;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-40px,30px)}50%{transform:translate(30px,-50px)}75%{transform:translate(-20px,-20px)}100%{transform:translate(0,0)}}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.75) 100%)}
+#black{position:absolute;inset:0;background:#000;z-index:80;opacity:0;pointer-events:none;transition:opacity .5s}
+#black.on{opacity:1}
+#flash{position:absolute;inset:0;background:#fff;z-index:79;opacity:0;pointer-events:none}
+#flash.go{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:.9}100%{opacity:0}}
+#stage.shake{animation:shake .45s linear}
+@keyframes shake{0%,100%{transform:var(--fit)}20%{transform:var(--fit) translate(-8px,4px)}40%{transform:var(--fit) translate(7px,-5px)}60%{transform:var(--fit) translate(-5px,-3px)}80%{transform:var(--fit) translate(4px,6px)}}
+
+/* subtitles for voice lines */
+#sub{position:absolute;left:50%;top:84px;transform:translateX(-50%);z-index:60;text-align:center;max-width:1400px;pointer-events:none;opacity:0;transition:opacity .5s}
+#sub.on{opacity:1}
+#sub.bottom{top:auto;bottom:90px}
+#sub.hidden{display:none}
+#sub .who{font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.3em;color:var(--red);text-transform:uppercase;margin-bottom:12px}
+#sub .line{font-family:'JetBrains Mono',monospace;font-size:34px;color:var(--ivory);line-height:1.35;text-shadow:0 2px 18px #000,0 0 4px #000}
+#sub.facility .line{color:#d9f3ff;letter-spacing:.08em}
+#num{position:absolute;right:44px;top:36px;z-index:61;font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.2em;color:rgba(239,232,220,.35)}
+#hint{position:absolute;right:44px;bottom:30px;z-index:61;font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.2em;color:rgba(239,232,220,.22);text-transform:uppercase}
+
+/* glitch text */
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;overflow:hidden}
+.glitch::before{color:#0ff;opacity:.55;animation:gl1 2.4s infinite steps(1);clip-path:inset(0 0 60% 0)}
+.glitch::after{color:#f12;opacity:.6;animation:gl2 1.9s infinite steps(1);clip-path:inset(55% 0 0 0)}
+@keyframes gl1{0%{transform:translate(0)}8%{transform:translate(-6px,2px)}10%{transform:translate(0)}52%{transform:translate(5px,-1px)}54%{transform:translate(0)}}
+@keyframes gl2{0%{transform:translate(0)}30%{transform:translate(6px,1px)}33%{transform:translate(0)}71%{transform:translate(-7px,-2px)}73%{transform:translate(0)}}
+
+/* 00 cold open */
+#cold{background:#000}
+#ecg{position:absolute;left:0;top:50%;width:100%;height:300px;transform:translateY(-50%)}
+/* 01 title */
+.kb{animation:kb 40s ease-out forwards}
+@keyframes kb{from{transform:scale(1.14)}to{transform:scale(1)}}
+.title-tag{position:absolute;left:120px;bottom:110px;font-size:30px;color:var(--bone);max-width:900px;line-height:1.4}
+.title-by{position:absolute;right:120px;bottom:110px;text-align:right}
+/* why */
+.why p{font-size:56px;line-height:1.2;font-weight:300;color:var(--bone);max-width:1400px}
+.why h1{font-size:128px;color:var(--ivory);max-width:1700px;margin-top:56px}
+.why h1 em{font-style:normal;color:var(--red)}
+.why .sub{font-size:30px;margin-top:40px;color:var(--mute);font-weight:400}
+/* premise */
+.premise h2{font-size:110px;max-width:900px}
+.premise p{font-size:36px;line-height:1.35;color:var(--bone);max-width:780px;font-weight:300}
+.order{font-family:'JetBrains Mono',monospace;font-size:64px;color:#fff;letter-spacing:.04em;line-height:1.1;margin:30px 0 40px}
+/* usp */
+.usp h1{font-size:128px;max-width:1500px}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:70px;margin-top:90px}
+.cols .n{font-family:'JetBrains Mono',monospace;color:var(--red);font-size:22px;letter-spacing:.2em}
+.cols h3{font-family:'Grenze Gotisch';font-weight:600;font-size:58px;margin:18px 0 20px;line-height:1}
+.cols p{font-size:28px;line-height:1.4;color:var(--bone);font-weight:300}
+/* loop */
+.loop h1{font-size:120px}
+#spiral{position:absolute;right:60px;top:120px;width:1140px;height:860px}
+#spiral path.sp{fill:none;stroke:var(--red);stroke-width:3;stroke-dasharray:4200;stroke-dashoffset:4200;transition:stroke-dashoffset 4.5s cubic-bezier(.4,.1,.2,1)}
+.slide.active #spiral path.sp.draw{stroke-dashoffset:0}
+#spiral text{font-family:'JetBrains Mono';font-size:25px;fill:var(--ivory);letter-spacing:.12em}
+#spiral circle{fill:var(--ink);stroke:var(--ivory);stroke-width:3}
+.branches{display:flex;flex-direction:column;gap:34px;margin-top:70px;max-width:820px}
+.branches div{font-size:30px;color:var(--bone);font-weight:300;line-height:1.35}
+.branches b{display:block;font-family:'JetBrains Mono';font-weight:400;font-size:22px;letter-spacing:.22em;color:var(--red);margin-bottom:6px}
+/* choice (visual novel) */
+.vn-name{font-family:'JetBrains Mono';font-size:22px;letter-spacing:.3em;color:var(--red);text-transform:uppercase}
+.vn-box{position:absolute;left:120px;right:120px;bottom:90px;background:rgba(10,9,9,.84);border:1px solid rgba(239,232,220,.18);padding:40px 56px 46px;backdrop-filter:blur(6px)}
+.vn-line{font-size:44px;line-height:1.3;margin:14px 0 34px;font-weight:300}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.opt{all:unset;cursor:pointer;border:1px solid rgba(239,232,220,.3);padding:26px 28px;font-size:27px;line-height:1.35;color:var(--ivory);position:relative;transition:background .3s,border-color .3s}
+.opt .k{display:block;font-family:'JetBrains Mono';font-size:18px;letter-spacing:.2em;color:var(--red);margin-bottom:10px}
+.opt:hover,.opt.hot{background:rgba(192,26,34,.22);border-color:var(--red)}
+.opt.used{opacity:.4}
+.opt.used::after{content:attr(data-result);position:absolute;right:18px;top:20px;font-family:'JetBrains Mono';font-size:16px;letter-spacing:.2em;color:var(--red)}
+.live{position:absolute;right:120px;top:100px;font-family:'JetBrains Mono';font-size:22px;letter-spacing:.3em;color:#fff;display:flex;align-items:center;gap:14px}
+.live i{width:14px;height:14px;border-radius:50%;background:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.2}}
+/* branches */
+.pair{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;background:#000}
+.pair img{width:100%;height:100%;object-fit:contain}
+.xfade{position:absolute;inset:0}
+.xfade img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 2.2s ease}
+.xfade img.top{opacity:0}
+.xfade.swap img.top{opacity:1}
+.outcome{position:absolute;left:120px;bottom:110px;max-width:1100px}
+.outcome h2{font-size:92px}
+.outcome p{font-size:32px;color:var(--bone);font-weight:300;margin-top:18px;line-height:1.35}
+.tag{display:inline-block;font-family:'JetBrains Mono';font-size:20px;letter-spacing:.25em;padding:10px 16px;border:1px solid currentColor;margin-bottom:26px}
+.tag.progress{color:#e9e2d4}.tag.death{color:var(--red)}.tag.lore{color:#b89a7c}
+.whiteout{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity 1.6s ease-in}
+.whiteout.on{opacity:1}
+/* death */
+.death-log{position:absolute;left:120px;top:140px;font-family:'JetBrains Mono';font-size:32px;line-height:1.9;color:var(--red);letter-spacing:.1em}
+.death h1{position:absolute;left:120px;bottom:130px;font-size:140px;max-width:1500px}
+#flat{position:absolute;left:0;top:50%;width:100%;height:4px;background:var(--red);box-shadow:0 0 18px var(--red);transform:scaleX(0);transform-origin:left;transition:transform 2.6s linear}
+.slide.active #flat.on{transform:scaleX(1)}
+/* setting */
+.setting h1{font-size:120px;max-width:760px}
+.strata{margin-top:54px;display:flex;flex-direction:column;gap:22px;max-width:760px}
+.strata > div{display:grid;grid-template-columns:70px 1fr;font-size:30px;font-weight:300;color:var(--bone);line-height:1.3}
+.strata span{font-family:'JetBrains Mono';font-size:22px;color:var(--red);padding-top:6px}
+.strata b{font-weight:600;color:var(--ivory)}
+/* characters */
+.chars{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr}
+.chars figure{position:relative;overflow:hidden}
+.chars img{width:100%;height:100%;object-fit:cover}
+.chars figcaption{position:absolute;left:70px;right:70px;bottom:90px}
+.chars h2{font-size:104px}
+.chars p{font-size:30px;line-height:1.4;color:var(--bone);font-weight:300;margin-top:14px;max-width:720px}
+/* look */
+.look h1{font-size:120px}
+.gallery{position:absolute;left:0;right:0;bottom:100px;height:500px;display:flex;gap:18px;padding:0 120px}
+.gallery img{flex:1;height:100%;object-fit:cover;min-width:0;filter:grayscale(calc(var(--h)*.4))}
+.look .desc{font-size:30px;color:var(--bone);font-weight:300;max-width:1100px;margin-top:26px;line-height:1.4}
+/* scope */
+.scope{display:grid;grid-template-columns:1.1fr .9fr;gap:120px}
+.scope h1{font-size:118px}
+.scope ul{list-style:none;margin-top:50px}
+.scope li{font-size:34px;font-weight:300;padding:16px 0;border-top:1px solid rgba(239,232,220,.15);color:var(--bone)}
+.scope li b{font-family:'JetBrains Mono';font-weight:400;color:var(--red);font-size:24px;margin-right:22px}
+.price{border:1px solid rgba(239,232,220,.2);padding:60px;align-self:center}
+.price h2{font-size:92px;margin:22px 0 26px}
+.price p{font-size:30px;line-height:1.4;font-weight:300;color:var(--bone)}
+/* end */
+.end-line{position:absolute;left:0;right:0;top:42%;text-align:center;font-family:'JetBrains Mono';font-size:40px;color:#ffb347;letter-spacing:.06em}
+.end-logo{position:absolute;left:0;right:0;top:150px;display:flex;justify-content:center}
+.end-logo img{width:1250px}
+.end-thanks{position:absolute;left:0;right:0;bottom:250px;text-align:center}
+.end-thanks h2{font-size:84px}
+.end-thanks p{font-family:'JetBrains Mono';font-size:22px;letter-spacing:.3em;color:var(--mute);margin-top:18px;text-transform:uppercase}
+/* appendix */
+.qa h1{font-size:96px}
+.qa .ans{font-size:36px;line-height:1.4;font-weight:300;color:var(--bone);max-width:1500px;margin-top:40px}
+.qa .ans b{color:var(--ivory);font-weight:600}
+.qa .alt{margin-top:50px;display:grid;grid-template-columns:1fr 1fr;gap:60px}
+.qa .alt div{font-size:26px;line-height:1.4;color:var(--mute);font-weight:300}
+#credits .alt{gap:90px;margin-top:60px}
+#credits .alt div{font-size:34px;color:var(--bone);line-height:1.45}
+#credits .alt b{font-size:22px;margin-bottom:16px}
+.qa .alt b{display:block;font-family:'JetBrains Mono';font-weight:400;color:var(--red);font-size:20px;letter-spacing:.2em;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+
+<!-- 00 COLD OPEN -->
+<section class="slide" id="cold" data-sub="bottom" data-title="Cold open" data-speaker="Kait (lights off)" data-h="0" data-drone="0.5"
+ data-notes="Lights off if you can. Stand still. Press SPACE once: hiss, heartbeat, then the Doctor wakes the room. Wait for her last line to finish before advancing. Do not speak.">
+  <canvas id="ecg" width="1920" height="300"></canvas>
+</section>
+
+<!-- 01 TITLE -->
+<section class="slide" id="title" data-enter="titleEnter" data-auto="2" data-title="Title" data-speaker="Kait" data-h="0.05" data-drone="0.35"
+ data-notes="Let the image sit for two seconds. Then: 'This is Spiraling. A first-person dark fantasy horror game with visual-novel dialogue. I'm Kait, this is Katia, she drew everything you are about to see.'">
+  <img class="bg kb" src="assets/hero.jpg" alt="">
+  <div class="shade-b"></div>
+  <p class="title-tag step">A first-person dark fantasy horror game<br>with visual-novel dialogue.</p>
+  <div class="title-by step"><div class="label">Kait &amp; Katia</div><div class="mono" style="font-size:18px;color:var(--mute);margin-top:10px;letter-spacing:.2em">GAME PRODUCTION I &amp; III</div></div>
+  <div class="credit" style="top:36px;bottom:auto;left:48px;right:auto">Original art: Katia</div>
+</section>
+
+<!-- 02 WHY -->
+<section class="slide why" id="why" data-auto="1" data-title="Why (Vision)" data-speaker="Kait" data-h="0.1" data-drone="0.4" data-enter="whyEnter"
+ data-notes="WHY. Ask it as a real question to the room, pause after each line. Click 1: heart and brain. Click 2: circuit boards. Click 3: the threshold (sting sound). Click 4: the godhood line.">
+  <div class="pad">
+    <div class="label step">Vision</div>
+    <p class="step" style="margin-top:40px">Heart and brain are our main electroconductive organs.</p>
+    <p class="step" style="margin-top:16px">What if you could swap them for circuit boards?</p>
+    <h1 class="g step" data-do="sfx:sting">Where is the threshold between a human and <em>a machine?</em></h1>
+    <p class="sub step">To ascend to godhood is to become a perfect, undying machine. Spiraling asks what that costs.</p>
+  </div>
+</section>
+
+<!-- 03 PREMISE -->
+<section class="slide premise" id="premise" data-auto="2" data-title="The premise (What)" data-speaker="Kait" data-h="0.18" data-drone="0.55"
+ data-notes="WHAT, in one breath. Click 2 triggers the facility voice and the glitch. Keep your voice low. 'Death is part of the process' is the line to land.">
+  <video class="bg" src="assets/opening.mp4" muted loop playsinline></video>
+  <div class="shade-l"></div>
+  <div class="pad">
+    <div class="label step">The premise</div>
+    <h2 class="g step" style="margin-top:34px">You wake in a body bag.</h2>
+    <p class="step" style="margin-top:40px">The facility has one instruction:</p>
+    <div class="order step" data-do="sfx:glitch;vo:facility-01;shake"><span class="glitch" data-text="BECOME THE PERFECT MACHINE.">BECOME THE PERFECT MACHINE.</span></div>
+    <p class="step">Choose how your body is modified. Every change has a consequence. Death is part of the process: you wake in the bag and try again.</p>
+  </div>
+  <div class="credit">Concept render, not gameplay</div>
+</section>
+
+<!-- 04 USP -->
+<section class="slide usp" id="usp" data-auto="2" data-title="USP" data-speaker="Kait" data-h="0.26" data-drone="0.4"
+ data-notes="USP. This is the sentence we want them to remember: your body determines which story you can survive. Then the three pillars, one click each.">
+  <div class="pad">
+    <div class="label step">Unique selling point</div>
+    <h1 class="g step" style="margin-top:30px">Your body determines which story you can survive.</h1>
+    <div class="cols">
+      <div class="step"><div class="n">01</div><h3>Modification is the mechanic</h3><p>Each procedure rewrites what you can touch, see and survive. The same live wire kills one body and guides another.</p></div>
+      <div class="step"><div class="n">02</div><h3>Death is the process</h3><p>You always wake in the bag again. Every failure teaches you the facility, and a little of who you were.</p></div>
+      <div class="step"><div class="n">03</div><h3>Humanity is the price</h3><p>The more machine you become, the less human the world feels. Voices, colours and memories drift away.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 LOOP -->
+<section class="slide loop" id="loop" data-auto="2" data-title="Core mechanics" data-speaker="Kait" data-h="0.32" data-drone="0.4" data-enter="loopEnter"
+ data-notes="HOW. The spiral draws itself. Walk the loop: wake, choose, explore, consequence, return. Then the three branches. End with: 'Let's show you instead.'">
+  <div class="pad" style="right:1000px">
+    <div class="label step">Core mechanics</div>
+    <h1 class="g step" style="margin-top:30px">Choose. Explore. Die. Return.</h1>
+    <div class="branches">
+      <div class="step"><b>Progress</b>A modification opens the route toward the true ending.</div>
+      <div class="step"><b>Death</b>A failed modification sends you back to the bag.</div>
+      <div class="step"><b>Revelation</b>An encounter exposes your past or the world's history.</div>
+    </div>
+  </div>
+  <svg id="spiral" viewBox="-140 0 1140 860">
+    <path class="sp" d=""/>
+  </svg>
+</section>
+
+<!-- 06 CHOICE -->
+<section class="slide" id="choice" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
+ data-notes="LIVE. Tell the room: 'You are the patient. Choose.' Katia counts hands. Press 1, 2 or 3 (or click). Eyes = death, then you come back here and they choose again. Heart = memory, then back here. Palms = progress and the deck moves on. If you are short on time press RIGHT to skip ahead.">
+  <img class="bg" src="assets/opening-still.jpg" alt="" style="filter:brightness(.55)">
+  <div class="live"><i></i>YOU ARE THE PATIENT</div>
+  <div class="vn-box">
+    <div class="vn-name">The Doctor</div>
+    <div class="vn-line" id="vnline">Which part of you shall we improve today? Choose. It is safe.</div>
+    <div class="opts">
+      <button class="opt" data-go="b-palms" data-result="PROGRESS"><span class="k">[1] Palms</span>Strip the skin from your palms. Replace it with nano-tissue.</button>
+      <button class="opt" data-go="b-eyes" data-result="DEATH"><span class="k">[2] Eyes</span>Implant sensors in your eyes. See through the walls.</button>
+      <button class="opt" data-go="b-heart" data-result="MEMORY"><span class="k">[3] Heart</span>Replace your heart with a perfect pump.</button>
+    </div>
+  </div>
+</section>
+
+<!-- BRANCH: PALMS (progress) -->
+<section class="slide branch" id="b-palms" data-auto="3" data-title="Branch: palms" data-speaker="Kait" data-h="0.44" data-drone="0.45" data-enter="palmsEnter" data-next="setting"
+ data-notes="PROGRESS. The palms change, the current hums. 'Now you can touch live wires and feel where the current wants to go. Without the modification, the same wire kills you.'">
+  <div class="xfade" id="palmsx"><img src="assets/palms-human.jpg" alt=""><img class="top" src="assets/palms-nano.jpg" alt=""></div>
+  <div class="shade-b"></div>
+  <div class="outcome">
+    <span class="tag progress step">PROGRESS</span>
+    <h2 class="g step">You feel where the current wants to go.</h2>
+    <p class="step">Live wires become a path. Without the modification, the same touch is fatal. The route toward the true ending opens.</p>
+  </div>
+  <div class="credit">Original concept art: Katia</div>
+</section>
+
+<!-- BRANCH: EYES (death) -->
+<section class="slide branch" id="b-eyes" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
+ data-notes="DEATH. Build it slowly. Click 1: the eye changes. Click 2: 'You can see the power lines through the walls.' Click 3: whiteout. Then advance to death.">
+  <div class="xfade" id="eyesx"><img src="assets/eye-human.jpg" alt=""><img class="top" src="assets/eye-modified.jpg" alt=""></div>
+  <div class="whiteout" id="whiteout"></div>
+  <div class="outcome">
+    <h2 class="g step" data-do="swap:eyesx;sfx:glitch">You see through the walls.</h2>
+    <p class="step">The power lines. The wards below. Everything.</p>
+    <h2 class="g step" data-do="whiteout;sfx:shutdown;sfx:flatlineShort" style="color:#000;position:relative;z-index:2">Then you see nothing.</h2>
+  </div>
+  <div class="credit">Original concept art: Katia</div>
+</section>
+
+<!-- DEATH -->
+<section class="slide branch death" id="death" data-title="Death" data-speaker="Kait" data-h="0.5" data-drone="0" data-enter="deathEnter" data-next="wake"
+ data-notes="Hard cut to black, flatline. Let it ring. Click: the log lines. Click: 'Death is part of the process.' Then advance: zipper, back in the bag.">
+  <div id="flat"></div>
+  <div class="death-log">
+    <div class="step">&gt; SEPSIS DETECTED</div>
+    <div class="step">&gt; SUBJECT DECEASED</div>
+    <div class="step" data-do="vo:facility-death">&gt; RETURNING TO STORAGE</div>
+  </div>
+  <h1 class="g step">Death is part of the process.</h1>
+</section>
+
+<!-- WAKE -->
+<section class="slide branch" id="wake" data-auto="1" data-title="Wake again" data-speaker="Kait" data-h="0.52" data-drone="0.55" data-enter="wakeEnter" data-next="choice"
+ data-notes="Zipper opens. 'And you wake up. Again.' Advance to choose again: the dead option is crossed out.">
+  <img class="bg kb" src="assets/opening-still.jpg" alt="">
+  <div class="shade-b"></div>
+  <div class="outcome"><h2 class="g step">Try again.</h2><p class="step">Same bag. Same doctor. You remember a little more.</p></div>
+</section>
+
+<!-- BRANCH: HEART (revelation) -->
+<section class="slide branch" id="b-heart" data-auto="2" data-title="Branch: heart" data-speaker="Kait" data-h="0.5" data-drone="0.3" data-enter="heartEnter" data-next="choice"
+ data-notes="REVELATION. The heartbeat stops, then the machine beat takes over. The Doctor asks if you remember. 'Some choices do not kill you, they show you who you were.' Then back to the choice.">
+  <img class="bg kb" src="assets/eye-corridor.jpg" alt="" style="filter:sepia(.5) brightness(.7)">
+  <div class="shade-l"></div>
+  <div class="outcome" style="bottom:auto;top:160px">
+    <span class="tag lore step">REVELATION</span>
+    <h2 class="g step">The monitor stops. For a moment, you remember.</h2>
+    <p class="step" data-do="vo:doctor-remember">Some procedures do not kill you. They show you who you were before the bag.</p>
+  </div>
+  <div class="credit">Original concept art: Katia</div>
+</section>
+
+<!-- 07 SETTING -->
+<section class="slide setting" id="setting" data-enter="settingEnter" data-auto="3" data-title="Setting" data-speaker="Katia" data-h="0.56" data-drone="0.4"
+ data-notes="KATIA. Setting. 'The hospital is a body. The facility promises ascent to godhood, but you descend.' Click through the five strata. Keep it moving.">
+  <img class="bg" src="assets/cutaway.jpg" alt="" style="left:38%;width:62%">
+  <div style="position:absolute;inset:0;background:linear-gradient(90deg,var(--ink) 38%,rgba(10,9,9,0) 58%)"></div>
+  <div class="pad">
+    <div class="label step">Setting</div>
+    <h1 class="g step" style="margin-top:30px">The hospital is a body.</h1>
+    <p class="step" style="font-size:32px;color:var(--bone);font-weight:300;max-width:740px;margin-top:26px;line-height:1.35">A Gothic medical shrine that promises ascent. To escape, you descend through its organs.</p>
+    <div class="strata">
+      <div class="step"><span>01</span><div><b>Perception</b> observation wards and archives</div></div>
+      <div class="step"><span>02</span><div><b>Circulation</b> the pump chapel</div></div>
+      <div class="step"><span>03</span><div><b>Filtration</b> fluid cisterns</div></div>
+      <div class="step"><span>04</span><div><b>Recycling</b> discarded implants</div></div>
+      <div class="step"><span>05</span><div><b>Foundation</b> the core</div></div>
+    </div>
+  </div>
+  <div class="credit">Level concept, AI-assisted</div>
+</section>
+
+<!-- 08 FIRST PERSON -->
+<section class="slide" id="views" data-auto="2" data-title="From the patient's eyes" data-speaker="Katia" data-h="0.6" data-drone="0.45"
+ data-notes="KATIA. One sentence: 'Everything is first person. You only ever see the facility from inside your own body.'">
+  <img class="bg kb" src="assets/level-views.jpg" alt="">
+  <div class="shade-b"></div>
+  <div class="outcome"><div class="label step">First person</div><h2 class="g step" style="margin-top:16px">You only ever see it from inside your body.</h2></div>
+  <div class="credit">Level concept, AI-assisted</div>
+</section>
+
+<!-- 09 CHARACTERS -->
+<section class="slide" id="chars" data-auto="1" data-title="Characters" data-speaker="Katia" data-h="0.66" data-drone="0.4"
+ data-notes="KATIA. Patient first, then the Doctor. The Doctor is the heart of the horror: she is kind, and that is the problem.">
+  <div class="chars">
+    <figure><img src="assets/patient.jpg" alt=""><div class="shade-b"></div>
+      <figcaption class="step"><div class="label">The Patient</div><h2 class="g" style="margin-top:14px">A body to be improved.</h2><p>Fully human when he wakes. Every choice is carved into him. His locket is the last link to the life before the bag.</p></figcaption></figure>
+    <figure><img src="assets/doctor-scene.jpg" alt=""><div class="shade-b"></div>
+      <figcaption class="step" data-do="vo:doctor-care"><div class="label">The Doctor</div><h2 class="g" style="margin-top:14px">Gentle. Precise. Certain.</h2><p>An elderly clinician who holds the promise of recovery. With her, care and control are impossible to separate.</p></figcaption></figure>
+  </div>
+</section>
+
+<!-- 10 LOOK -->
+<section class="slide look" id="look" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
+ data-notes="KATIA. Talk about the art direction in your own words: stylised, sculptural, drawn texture. Beauty that feels wrong.">
+  <div class="pad">
+    <div class="label step">Look and feel</div>
+    <h1 class="g step" style="margin-top:26px">Beauty that feels wrong.</h1>
+    <p class="desc step">Stylised sculptural 3D with drawn texture. Wet porcelain, cables, surgical light, deep shadow. Black, ivory, surgical red, aged brown.</p>
+  </div>
+  <div class="gallery step">
+    <img src="assets/cable-figure.jpg" alt=""><img src="assets/seated-figure.jpg" alt=""><img src="assets/arm.jpg" alt=""><img src="assets/stairs.jpg" alt=""><img src="assets/perfect-machine.jpg" alt="">
+  </div>
+  <div class="credit">Original concept art: Katia</div>
+</section>
+
+<!-- 11 SCOPE + MONETIZATION -->
+<section class="slide" id="scope" data-auto="2" data-title="Scope and monetization" data-speaker="Kait" data-h="0.8" data-drone="0.35"
+ data-notes="KAIT. What we build first: one full spiral. Then monetization, the last line gets a laugh if you deliver it dry.">
+  <div class="pad scope">
+    <div>
+      <div class="label step">First milestone</div>
+      <h1 class="g step" style="margin-top:26px">Build one complete spiral.</h1>
+      <ul class="step">
+        <li><b>01</b>One awakening in the bag</li>
+        <li><b>01</b>One conversation with the Doctor</li>
+        <li><b>03</b>Modifications to choose from</li>
+        <li><b>03</b>Outcomes: progress, death, memory</li>
+        <li><b>&infin;</b>Returns to the bag</li>
+      </ul>
+    </div>
+    <div class="price step">
+      <div class="label">Monetization</div>
+      <h2 class="g">One-time purchase.</h2>
+      <p>No microtransactions. In a game about buying a better body, nothing is for sale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 TRAILER -->
+<section class="slide" id="trailer" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
+ data-notes="Say nothing. 32 seconds. The deck moves on to the end slide by itself when the video finishes.">
+  <video class="bg" id="animatic" src="assets/animatic.mp4" playsinline style="object-fit:contain;background:#000"></video>
+</section>
+
+<!-- 13 END -->
+<section class="slide" id="end" data-sub="bottom" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
+ data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: 'Thank you.' Then questions. Backup slides follow if they ask about death or humanity.">
+  <div class="end-line step" data-do="vo:patient-machine">i am a perfect machine.</div>
+  <div class="end-logo step" data-do="sfx:boom;flash;hideprev"><img src="assets/logo.png" alt="Spiraling"></div>
+  <div class="end-thanks step" data-do="vo:facility-end"><h2 class="g">Wake up again.</h2><p>Thank you. Questions?</p></div>
+</section>
+
+<!-- APPENDIX -->
+<section class="slide qa" id="qa-death" data-title="Backup: what survives death" data-speaker="Q&amp;A" data-h="0.2" data-drone="0"
+ data-notes="Only if asked. Our current answer is on the slide; the alternatives are there to show we considered them.">
+  <div class="pad">
+    <div class="label">Backup / Q&amp;A</div>
+    <h1 class="g" style="margin-top:24px">What survives death?</h1>
+    <p class="ans"><b>Your body survives. Your memory frays.</b> Modifications stay after resurrection, but each death costs a memory: a flashback you can no longer replay, a face in the locket that fades. You get stronger by forgetting who you are.</p>
+    <div class="alt">
+      <div><b>Considered: knowledge only</b>The body resets, only what the player learned survives. Clean, but it removes the cost.</div>
+      <div><b>Considered: the Doctor remembers</b>Everything resets for you, but the facility keeps records and reacts to your previous attempts.</div>
+    </div>
+  </div>
+</section>
+<section class="slide qa" id="qa-humanity" data-title="Backup: humanity" data-speaker="Q&amp;A" data-h="0.2" data-drone="0"
+ data-notes="Only if asked. Key point: no morality bar. Humanity is something you perceive and something that limits what you can say.">
+  <div class="pad">
+    <div class="label">Backup / Q&amp;A</div>
+    <h1 class="g" style="margin-top:24px">How does humanity work?</h1>
+    <p class="ans"><b>Not a morality bar.</b> Humanity is felt, not counted. As you modify your body, colour drains, the Doctor's voice loses warmth, your inner voice turns to machine text. And human dialogue options (plead, lie, comfort, remember) close, while machine options (comply, calculate) open.</p>
+    <div class="alt">
+      <div><b>Perception</b>Sound, colour and interface change with your body. You read your humanity from the world.</div>
+      <div><b>Dialogue access</b>Your body decides which things you are still able to say. That shapes which endings stay reachable.</div>
+    </div>
+  </div>
+</section>
+<section class="slide qa" id="credits" data-title="Credits" data-speaker="Q&amp;A" data-h="0" data-drone="0" data-notes="Credits.">
+  <div class="pad">
+    <div class="label">Credits</div>
+    <h1 class="g" style="margin-top:24px">Spiraling</h1>
+    <p class="ans">Game concept: <b>Kait, Katia &amp; Jannis</b></p>
+    <div class="alt">
+      <div><b>Original drawings</b>All hand-drawn pictures, characters and concept art are made by Katia.</div>
+      <div><b>AI-assisted images</b>Some images are AI-assisted, made for mockup purposes and visual representation only: level concepts, renders and the trailer footage. They are not gameplay.</div>
+    </div>
+    <p class="ans" style="font-size:26px;color:var(--mute);margin-top:50px">Voices: ElevenLabs &middot; Sound effects: sound library</p>
+  </div>
+</section>
+
+<div id="sub"><div class="who"></div><div class="line"></div></div>
+<div id="num"></div>
+<div id="hint">press space</div>
+<div id="vignette"></div>
+<div id="scan"></div>
+<div id="grain"></div>
+<div id="flash"></div>
+<div id="black"></div>
+</div></div>
+
+<script>
+/* ================= AUDIO ================= */
+let AC, master, noiseBuf, droneGain, started = false, muted = false;
+const heart = { on:false, bpm:54, h:0, next:0, timer:null };
+const FILES = {}; // id -> HTMLAudioElement when the file exists
+
+// Voice lines. Drop the ElevenLabs renders into audio/ with these names.
+const VO = {
+  'doctor-wake':     { who:'The Doctor',   text:"Shh. Don't move yet. ... Good morning. ... You died again." },
+  'doctor-pump':     { who:'The Doctor',   text:"Your heart is only a pump. Your brain is only a current. We can build you better ones." },
+  'facility-01':     { who:'Facility',     text:"Patient awake. Resurrection complete. To earn your second life, you must become the perfect machine.", fac:true },
+  'doctor-choose':   { who:'The Doctor',   text:"Which part of you shall we improve today? Choose. It is safe." },
+  'doctor-palms':    { who:'The Doctor',   text:"Good. Now you can feel where the current wants to go." },
+  'doctor-eyes':     { who:'The Doctor',   text:"Hold still. You will see everything." },
+  'facility-death':  { who:'Facility',     text:"Subject deceased. Returning to storage.", fac:true },
+  'doctor-again':    { who:'The Doctor',   text:"There you are. Let's try again." },
+  'doctor-remember': { who:'The Doctor',   text:"There. Do you remember now? ... Don't worry. It will pass." },
+  'doctor-care':     { who:'The Doctor',   text:"I only want what is best for you." },
+  'patient-machine': { who:'You',          text:"i am a perfect machine." },
+  'facility-end':    { who:'Facility',     text:"Thank you for your attention. Please return to your bag.", fac:true },
+};
+const SFX = ['hiss','zipper','flatline','buzz','glitch','boom','sting','shutdown','hit','heartroom','whoosh','trailer','bed'];
+
+function probe(name){
+  const a = new Audio(); a.preload = 'auto';
+  a.addEventListener('canplaythrough', () => { FILES[name] = a; }, { once:true });
+  a.addEventListener('error', () => {}, { once:true });
+  a.src = 'audio/' + name + '.mp3';
+}
+Object.keys(VO).forEach(k => probe('vo-' + k));
+SFX.forEach(k => probe('sfx-' + k));
+
+function initAudio(){
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  const comp = AC.createDynamicsCompressor();
+  master = AC.createGain(); master.gain.value = 0.9;
+  master.connect(comp); comp.connect(AC.destination);
+  noiseBuf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
+  const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  startDrone();
+}
+const now = () => AC.currentTime;
+function env(g, t, a, peak, dec){ g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + dec); }
+function noise(){ const s = AC.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; }
+function osc(type, f){ const o = AC.createOscillator(); o.type = type; o.frequency.value = f; return o; }
+
+function thump(t, vol){
+  const o = osc('sine', 70), g = AC.createGain();
+  o.frequency.setValueAtTime(72, t); o.frequency.exponentialRampToValueAtTime(36, t + 0.16);
+  env(g, t, 0.006, vol, 0.24); o.connect(g).connect(master); o.start(t); o.stop(t + 0.35);
+}
+function blip(t, f, vol, dur, type){
+  const o = osc(type || 'square', f), g = AC.createGain(), lp = AC.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 3200;
+  env(g, t, 0.003, vol, dur); o.connect(lp).connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+}
+function beat(t){
+  const human = 1 - heart.h;
+  if (human > 0.03){ thump(t, 0.85 * human + 0.05); thump(t + 0.27, 0.5 * human + 0.03); }
+  if (heart.h > 0.03){ blip(t, 1000, 0.14 * heart.h, 0.07, heart.h > 0.7 ? 'square' : 'sine'); }
+}
+function heartStart(bpm){
+  heart.bpm = bpm || heart.bpm;
+  if (heart.on) return; heart.on = true; heart.next = now() + 0.1;
+  heart.timer = setInterval(() => {
+    while (heart.next < now() + 0.12){ beat(heart.next); heart.next += 60 / heart.bpm; }
+  }, 25);
+}
+function heartStop(){ heart.on = false; clearInterval(heart.timer); }
+
+function startDrone(){
+  droneGain = AC.createGain(); droneGain.gain.value = 0.0001;
+  const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 190; lp.Q.value = 4;
+  [55, 55.6, 82.4].forEach(f => { const o = osc('sawtooth', f); o.connect(lp); o.start(); });
+  const n = noise(), bp = AC.createBiquadFilter(), ng = AC.createGain();
+  bp.type = 'bandpass'; bp.frequency.value = 420; bp.Q.value = 0.6; ng.gain.value = 0.25;
+  n.connect(bp).connect(ng).connect(lp); n.start();
+  const lfo = osc('sine', 0.07), lg = AC.createGain(); lg.gain.value = 70; lfo.connect(lg).connect(lp.frequency); lfo.start();
+  lp.connect(droneGain).connect(master);
+}
+function drone(level){ if (!AC) return; droneGain.gain.setTargetAtTime(Math.max(0.0001, level * 0.16), now(), 1.2); bedLevel = level; bed(level); }
+
+const synth = {
+  hiss(){ const t = now(), n = noise(), hp = AC.createBiquadFilter(), g = AC.createGain();
+    hp.type = 'highpass'; hp.frequency.value = 2400;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+    n.connect(hp).connect(g).connect(master); n.start(t); n.stop(t + 3.3); },
+  zipper(){ const t0 = now(); let t = t0;
+    for (let i = 0; i < 38; i++){ const n = noise(), bp = AC.createBiquadFilter(), g = AC.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 2200 + Math.random() * 1600; bp.Q.value = 3;
+      env(g, t, 0.002, 0.5, 0.012); n.connect(bp).connect(g).connect(master); n.start(t); n.stop(t + 0.03);
+      t += 0.022 * (1 - i / 70); } },
+  flatline(dur){ const t = now(), o = osc('sine', 1000), g = AC.createGain(); dur = dur || 5;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.13, t + 0.02);
+    g.gain.setValueAtTime(0.13, t + dur - 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.1); },
+  flatlineShort(){ synth.flatline(1.6); },
+  buzz(){ const t = now(), g = AC.createGain(), bp = AC.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 240; bp.Q.value = 1.2;
+    [50, 100, 150.5].forEach(f => { const o = osc('sawtooth', f); o.connect(bp); o.start(t); o.stop(t + 4); });
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + 4);
+    bp.connect(g).connect(master);
+    for (let i = 0; i < 14; i++){ const c = noise(), cg = AC.createGain(), ct = t + 0.3 + Math.random() * 3.2;
+      env(cg, ct, 0.001, 0.4, 0.02); c.connect(cg).connect(master); c.start(ct); c.stop(ct + 0.05); } },
+  glitch(){ const t = now();
+    for (let i = 0; i < 16; i++){ const st = t + i * 0.03 + Math.random() * 0.02;
+      if (Math.random() < 0.35) continue;
+      const n = noise(), bp = AC.createBiquadFilter(), g = AC.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 300 + Math.random() * 5000; bp.Q.value = 8;
+      env(g, st, 0.001, 0.6, 0.03); n.connect(bp).connect(g).connect(master); n.start(st); n.stop(st + 0.06); }
+    blip(t, 180, 0.2, 0.25, 'square'); },
+  boom(){ const t = now(), o = osc('sine', 55), g = AC.createGain();
+    o.frequency.setValueAtTime(60, t); o.frequency.exponentialRampToValueAtTime(28, t + 2.2);
+    env(g, t, 0.01, 1.0, 2.8); o.connect(g).connect(master); o.start(t); o.stop(t + 3);
+    const n = noise(), lp = AC.createBiquadFilter(), ng = AC.createGain();
+    lp.type = 'lowpass'; lp.frequency.value = 260; env(ng, t, 0.005, 0.8, 0.9);
+    n.connect(lp).connect(ng).connect(master); n.start(t); n.stop(t + 1.2); },
+  sting(){ const t = now();
+    [1661, 1760, 1864.7, 2217].forEach((f, i) => { const o = osc('sine', f), g = AC.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.025, t + 1.2 + i * 0.2); g.gain.exponentialRampToValueAtTime(0.0001, t + 5);
+      o.connect(g).connect(master); o.start(t); o.stop(t + 5.1); }); },
+};
+// a file in audio/ (from Kait's library) wins; otherwise the synth version plays
+let clips = [];
+function sfx(name, vol){
+  if (!AC || muted || quiet) return;
+  const f = FILES['sfx-' + name];
+  if (f && name !== 'flatlineShort'){ const a = f.cloneNode(); a.volume = vol == null ? 1 : vol; a.play().catch(()=>{}); clips.push(a); return; }
+  (synth[name] || (()=>{}))();
+}
+function stopClips(){ clips.forEach(a => { try { a.pause(); } catch(e){} }); clips = []; }
+
+// looping horror drone under the whole talk, follows each slide's drone level
+let bedLevel = 0, bedFade = null;
+function bed(level){
+  const b = FILES['sfx-bed']; if (!b) return;
+  b.loop = true;
+  const target = muted ? 0 : Math.min(1, level * 1.1);
+  if (target > 0 && b.paused){ b.volume = 0; b.play().catch(()=>{}); }
+  clearInterval(bedFade);
+  bedFade = setInterval(() => {
+    const d = target - b.volume;
+    if (Math.abs(d) < 0.02){ b.volume = target; clearInterval(bedFade); if (target === 0) b.pause(); return; }
+    b.volume = Math.max(0, Math.min(1, b.volume + Math.sign(d) * 0.02));
+  }, 60);
+}
+
+/* voice + subtitle */
+const subEl = document.getElementById('sub');
+let subTimer, curVO, typeTimer;
+function vo(id){
+  const v = VO[id]; if (!v) return;
+  subEl.className = (v.fac ? 'facility ' : '') + ((cur && cur.dataset.sub) || '');
+  subEl.querySelector('.who').textContent = v.who;
+  const line = subEl.querySelector('.line'); line.textContent = '';
+  subEl.classList.add('on');
+  clearInterval(typeTimer); let i = 0;
+  typeTimer = setInterval(() => { line.textContent = v.text.slice(0, ++i); if (i >= v.text.length) clearInterval(typeTimer); }, v.fac ? 28 : 42);
+  const f = FILES['vo-' + id];
+  let dur = v.text.length * 65 + 1800;
+  if (curVO){ curVO.pause(); }
+  if (f && !muted){ curVO = f; f.currentTime = 0; f.play().catch(()=>{}); if (isFinite(f.duration)) dur = f.duration * 1000 + 1200; }
+  clearTimeout(subTimer); subTimer = setTimeout(() => subEl.classList.remove('on'), dur);
+}
+function hideSub(){ clearTimeout(subTimer); subEl.classList.remove('on'); if (curVO) curVO.pause(); }
+
+/* ================= DECK ================= */
+const stage = document.getElementById('stage');
+const slides = [...document.querySelectorAll('.slide')];
+const byId = id => document.getElementById(id);
+const main = slides.filter(s => !s.classList.contains('branch'));
+let cur = null, step = 0, timers = [], trail = [], used = new Set(), quiet = false;
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+const stepsOf = el => [...el.querySelectorAll('.step')];
+
+function fit(){
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const f = `translate(-50%,-50%) scale(${s})`;
+  stage.style.setProperty('--fit', f);
+  stage.style.transform = f;
+}
+addEventListener('resize', fit); fit();
+
+// silent = restore the look of a step without replaying sound or shakes (used when going back)
+function run(cmds, silent){
+  (cmds || '').split(';').map(c => c.trim()).filter(Boolean).forEach(c => {
+    const [k, v] = c.split(':');
+    if (k === 'swap') byId(v).classList.add('swap');
+    else if (k === 'whiteout') byId('whiteout').classList.add('on');
+    else if (k === 'hideprev') cur.querySelector('.end-line').classList.remove('on');
+    else if (silent) return;
+    else if (k === 'sfx') sfx(v);
+    else if (k === 'vo') vo(v);
+    else if (k === 'shake'){ stage.classList.remove('shake'); void stage.offsetWidth; stage.classList.add('shake'); }
+    else if (k === 'flash'){ const f = byId('flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+  });
+}
+function undo(cmds){
+  (cmds || '').split(';').map(c => c.trim()).filter(Boolean).forEach(c => {
+    const [k, v] = c.split(':');
+    if (k === 'swap') byId(v).classList.remove('swap');
+    else if (k === 'whiteout') byId('whiteout').classList.remove('on');
+    else if (k === 'hideprev') cur.querySelector('.end-line').classList.add('on');
+    else if (k === 'vo') hideSub();
+  });
+}
+
+const ACTIONS = {
+  cold(){
+    drawECG();
+    sfx('hiss');
+    later(() => heartStart(50), 2200);
+    later(() => vo('doctor-wake'), 6000);
+  },
+  titleEnter(){ sfx('hit'); },
+  settingEnter(){ sfx('whoosh', 0.8); },
+  whyEnter(){ later(() => vo('doctor-pump'), 900); },
+  loopEnter(){ drawSpiral(); later(() => cur.querySelector('#spiral path.sp').classList.add('draw'), 60); },
+  choiceEnter(){
+    cur.querySelectorAll('.opt').forEach(b => b.classList.toggle('used', used.has(b.dataset.go)));
+    const line = used.size ? "There you are. Let's try again. Choose." : "Which part of you shall we improve today? Choose. It is safe.";
+    byId('vnline').textContent = line;
+    later(() => vo(used.size ? 'doctor-again' : 'doctor-choose'), 700);
+  },
+  palmsEnter(){ later(() => { byId('palmsx').classList.add('swap'); sfx('buzz'); vo('doctor-palms'); }, 900); },
+  eyesEnter(){ byId('eyesx').classList.remove('swap'); byId('whiteout').classList.remove('on'); later(() => vo('doctor-eyes'), 800); },
+  deathEnter(){ heartStop(); drone(0); const f = byId('flat'); f.classList.remove('on'); void f.offsetWidth; later(() => { f.classList.add('on'); sfx('flatline'); }, 400); },
+  wakeEnter(){ sfx('zipper'); later(() => heartStart(64), 900); },
+  heartEnter(){ heartStop(); later(() => sfx('heartroom'), 300); later(() => { heart.h = Math.min(1, heart.h + 0.25); heartStart(58); }, 3800); },
+  trailerEnter(){ const v = byId('animatic'); v.currentTime = 0; v.play().catch(()=>{}); sfx('trailer', 0.9); },
+  endEnter(){ later(() => { heartStop(); }, 200); },
+};
+
+// opts.back: arriving by going back, so show the slide fully built and stay quiet
+function show(el, opts = {}){
+  timers.forEach(clearTimeout); timers = [];
+  hideSub(); stopClips();
+  const cut = opts.cut && !opts.back;
+  if (cur && cur !== el){
+    cur.classList.remove('active');
+    cur.querySelectorAll('video').forEach(v => v.pause());
+    if (cut) cur.classList.add('cut');
+    const prev = cur; setTimeout(() => prev.classList.remove('cut'), 50);
+  }
+  cur = el;
+  if (cut) el.classList.add('cut');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('cut'), 50);
+  el.querySelectorAll('.kb').forEach(i => { i.style.animation = 'none'; void i.offsetWidth; i.style.animation = ''; });
+  el.querySelectorAll('video[muted]').forEach(v => { v.currentTime = 0; v.play().catch(()=>{}); });
+  const h = parseFloat(el.dataset.h || 0);
+  stage.style.setProperty('--h', h);
+  heart.h = Math.max(heart.h, h * 0.9);
+  if (el.id !== 'cold') ecgGen++;
+
+  const steps = stepsOf(el);
+  steps.forEach(s => { s.classList.remove('on'); s.style.transitionDelay = ''; });
+  quiet = !!opts.back;
+  if (started){
+    drone(parseFloat(el.dataset.drone || 0));
+    if (el.id !== 'cold' && !['death','b-heart','trailer','end'].includes(el.id) && !heart.on && el.dataset.drone !== '0') heartStart(56);
+    if (el.dataset.enter && ACTIONS[el.dataset.enter]) ACTIONS[el.dataset.enter]();
+  }
+  if (opts.back){
+    steps.forEach(s => { s.classList.add('on'); run(s.dataset.do, true); });
+    step = steps.length;
+  } else {
+    // the first few builds of a slide appear by themselves, so a slide never lands empty
+    const auto = Math.min(parseInt(el.dataset.auto || 0), steps.length);
+    for (let i = 0; i < auto; i++){ steps[i].style.transitionDelay = (0.25 + i * 0.35) + 's'; steps[i].classList.add('on'); run(steps[i].dataset.do); }
+    step = auto;
+  }
+  quiet = false;
+  byId('num').textContent = main.includes(el) ? String(main.indexOf(el)).padStart(2, '0') : '';
+  byId('hint').style.display = (el.id === 'cold' && !started) ? '' : 'none';
+  try { window.history.replaceState(null, '', '#' + el.id); } catch(e){}
+  updatePresenter();
+}
+
+function nextSlide(){
+  if (cur.dataset.next) return byId(cur.dataset.next);
+  if (cur.id === 'choice' && !used.size) return null;
+  const i = main.indexOf(cur);
+  return i < 0 ? null : (main[i + 1] || null);
+}
+function go(el, opts = {}){
+  if (!el || el === cur) return;
+  // coming back round to a slide already on the trail (the choice loop): rewind the trail instead of growing it
+  const i = trail.indexOf(el);
+  if (i >= 0) trail = trail.slice(0, i); else trail.push(cur);
+  show(el, opts);
+}
+function next(){
+  if (!started){ start(); return; }
+  const steps = stepsOf(cur);
+  if (step < steps.length){
+    const s = steps[step++]; s.style.transitionDelay = ''; s.classList.add('on'); run(s.dataset.do); updatePresenter(); return;
+  }
+  if (cur.id === 'choice' && !used.size){
+    const o = cur.querySelectorAll('.opt'); o.forEach(b => b.classList.add('hot')); setTimeout(() => o.forEach(b => b.classList.remove('hot')), 400); return;
+  }
+  const n = nextSlide(); if (!n) return;
+  go(n, { cut: n.id === 'death' || cur.id === 'death' });
+}
+function prev(wholeSlide){
+  const auto = parseInt(cur.dataset.auto || 0);
+  if (!wholeSlide && step > auto){
+    const s = stepsOf(cur)[--step]; s.classList.remove('on'); undo(s.dataset.do); updatePresenter(); return;
+  }
+  const p = trail.pop(); if (p) show(p, { back:true });
+}
+function choose(id){
+  if (cur.id !== 'choice') return;
+  if (!started) start();
+  used.add(id); sfx('glitch'); go(byId(id));
+}
+function start(){
+  initAudio(); AC.resume(); started = true;
+  byId('hint').style.display = 'none';
+  drone(parseFloat(cur.dataset.drone || 0));
+  if (cur.id === 'cold') ACTIONS.cold();
+  else if (cur.dataset.enter && ACTIONS[cur.dataset.enter]) ACTIONS[cur.dataset.enter]();
+}
+
+function onKey(e){
+  if (e.repeat) return;
+  const k = e.key;
+  if (['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(k)){ e.preventDefault(); next(); }
+  else if (['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k)){ e.preventDefault(); prev(e.shiftKey); }
+  else if (k === '1') choose('b-palms');
+  else if (k === '2') choose('b-eyes');
+  else if (k === '3') choose('b-heart');
+  else if (k === 'm' || k === 'M'){ muted = !muted; if (master) master.gain.setTargetAtTime(muted ? 0 : 0.9, now(), 0.1); if (muted) stopClips(); bed(bedLevel); }
+  else if (k === 'b' || k === 'B') byId('black').classList.toggle('on');
+  else if (k === 'f' || k === 'F'){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+  else if (k === 'p' || k === 'P') openPresenter();
+  else if (k === 's' || k === 'S') go(byId('setting'));
+  else if (k === 'q' || k === 'Q') go(byId('qa-death'), { back:true });
+  else if (k === 'Home'){ window.location.hash = ''; location.reload(); }
+}
+
+document.querySelectorAll('.opt').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); choose(b.dataset.go); }));
+stage.addEventListener('click', e => { if (e.button === 0) next(); });
+addEventListener('mousemove', () => { document.body.classList.add('cursor'); clearTimeout(window._ct); window._ct = setTimeout(() => document.body.classList.remove('cursor'), 1500); });
+addEventListener('keydown', onKey);
+// when the trailer finishes, move straight on to the end slide
+byId('animatic').addEventListener('ended', () => { if (cur && cur.id === 'trailer') next(); });
+
+/* ECG line for the cold open */
+let ecgGen = 0;
+function drawECG(){
+  const gen = ++ecgGen;
+  const c = byId('ecg'), x = c.getContext('2d'); let px = 0; const W = 1920, H = 300, mid = H / 2;
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  const pts = [];
+  function y(i){ const bpm = heart.on ? heart.bpm : 0; if (!bpm) return mid;
+    const p = (performance.now() / 1000) % (60 / bpm) / (60 / bpm);
+    if (p < 0.04) return mid - Math.sin(p / 0.04 * Math.PI) * 14;
+    if (p > 0.1 && p < 0.12) return mid + 18;
+    if (p > 0.12 && p < 0.15) return mid - 120 * (1 - Math.abs(p - 0.135) / 0.015);
+    if (p > 0.15 && p < 0.17) return mid + 30;
+    if (p > 0.3 && p < 0.4) return mid - Math.sin((p - 0.3) / 0.1 * Math.PI) * 22;
+    return mid + (Math.random() - 0.5) * 1.5; }
+  let last = mid;
+  (function frame(){
+    if (gen !== ecgGen) return;
+    x.shadowBlur = 0; x.fillStyle = 'rgba(0,0,0,.06)'; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#000'; x.fillRect(px, 0, 30, H);
+    for (let k = 0; k < 6; k++){
+      const ny = y(); x.strokeStyle = '#c01a22'; x.lineWidth = 3; x.shadowColor = '#ff2a33'; x.shadowBlur = 12;
+      x.beginPath(); x.moveTo(px, last); x.lineTo(px + 2, ny); x.stroke(); last = ny; px += 2; if (px > W){ px = 0; }
+    }
+    requestAnimationFrame(frame);
+  })();
+}
+
+/* spiral path for the core loop */
+function drawSpiral(){
+  const svg = byId('spiral'), path = svg.querySelector('path.sp');
+  svg.querySelectorAll('g').forEach(g => g.remove());
+  const cx = 430, cy = 430, turns = 2.6, a = 20, b = 52; let d = '';
+  const pt = th => [cx + (a + b * th / (Math.PI)) * Math.cos(th), cy + (a + b * th / (Math.PI)) * Math.sin(th)];
+  for (let th = 0; th <= turns * 2 * Math.PI; th += 0.05){ const [x, y] = pt(th); d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+  path.setAttribute('d', d);
+  const labels = ['WAKE', 'CHOOSE', 'EXPLORE', 'CONSEQUENCE', 'LEARN OR DIE'];
+  const ns = 'http://www.w3.org/2000/svg';
+  labels.forEach((l, i) => {
+    const th = turns * 2 * Math.PI - 0.35 - i * (2 * Math.PI / labels.length) * 0.92;
+    const [x, y] = pt(th);
+    const g = document.createElementNS(ns, 'g'); g.style.opacity = 0; g.style.transition = 'opacity .8s';
+    const c = document.createElementNS(ns, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 11);
+    const t = document.createElementNS(ns, 'text'); t.textContent = l; const left = x < cx; t.setAttribute('x', left ? x - 22 : x + 22); t.setAttribute('y', y + 8); t.setAttribute('text-anchor', left ? 'end' : 'start');
+    g.append(c, t); svg.append(g);
+    later(() => g.style.opacity = 1, 900 + i * 800);
+  });
+}
+
+/* presenter window (press P) */
+let pw = null, pwTimer = null; const t0 = Date.now();
+function openPresenter(){
+  pw = window.open('', 'spiraling-presenter', 'width=760,height=560');
+  if (!pw) return;
+  pw.document.onkeydown = e => onKey(e);
+  clearInterval(pwTimer);
+  pw.document.title = 'Spiraling: presenter';
+  pw.document.body.style.cssText = 'background:#111;color:#eee;font:18px/1.5 Inter,system-ui;padding:24px';
+  updatePresenter();
+  pwTimer = setInterval(updatePresenter, 1000);
+}
+function updatePresenter(){
+  if (!pw || pw.closed || !cur) return;
+  const n = nextSlide(); const steps = cur.querySelectorAll('.step').length;
+  const s = Math.floor((Date.now() - t0) / 1000);
+  pw.document.body.innerHTML = `
+    <div style="color:#c01a22;letter-spacing:.2em;font-size:13px">NOW · ${cur.dataset.speaker || ''}</div>
+    <h2 style="margin:6px 0 4px">${cur.dataset.title}</h2>
+    <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}</div>
+    <p style="font-size:22px;margin-top:18px">${cur.dataset.notes || ''}</p>
+    <div style="color:#888;margin-top:24px">NEXT: ${n ? n.dataset.title : (cur.id === 'choice' ? 'press 1 / 2 / 3' : 'end')}</div>
+    <div style="color:#555;font-size:13px;margin-top:30px">SPACE next · ← undo click · shift+← previous slide · 1/2/3 choose · S skip to setting · Q backup Q&amp;A · M mute · B black · F fullscreen</div>`;
+}
+
+show(byId(location.hash.slice(1)) || byId('cold'));
+</script>
+</body>
+</html>
