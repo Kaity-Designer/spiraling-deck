@@ -48,9 +48,9 @@ body.cursor{cursor:default}
 @keyframes shake{0%,100%{transform:var(--fit)}20%{transform:var(--fit) translate(-8px,4px)}40%{transform:var(--fit) translate(7px,-5px)}60%{transform:var(--fit) translate(-5px,-3px)}80%{transform:var(--fit) translate(4px,6px)}}
 
 /* subtitles for voice lines */
-#sub{position:absolute;left:50%;top:84px;transform:translateX(-50%);z-index:60;text-align:center;max-width:1400px;pointer-events:none;opacity:0;transition:opacity .5s}
+#sub{position:absolute;left:50%;bottom:80px;transform:translateX(-50%);z-index:60;text-align:center;max-width:1400px;pointer-events:none;opacity:0;transition:opacity .5s}
 #sub.on{opacity:1}
-#sub.bottom{top:auto;bottom:90px}
+#sub.top{bottom:auto;top:84px}
 #sub.hidden{display:none}
 #sub .who{font-family:'JetBrains Mono',monospace;font-size:18px;letter-spacing:.3em;color:var(--red);text-transform:uppercase;margin-bottom:12px}
 #sub .line{font-family:'JetBrains Mono',monospace;font-size:34px;color:var(--ivory);line-height:1.35;text-shadow:0 2px 18px #000,0 0 4px #000}
@@ -182,13 +182,13 @@ body.cursor{cursor:default}
 <div id="viewport"><div id="stage">
 
 <!-- 00 COLD OPEN -->
-<section class="slide" id="cold" data-sub="bottom" data-title="Cold open" data-speaker="Kait (lights off)" data-h="0" data-drone="0.5"
+<section class="slide" id="cold" data-time="30" data-title="Cold open" data-speaker="Kait (lights off)" data-h="0" data-drone="0.5"
  data-notes="Lights off if you can. Stand still. Press SPACE once: hiss, heartbeat, then the Doctor wakes the room. Wait for her last line to finish before advancing. Do not speak.">
   <canvas id="ecg" width="1920" height="300"></canvas>
 </section>
 
 <!-- 01 TITLE -->
-<section class="slide" id="title" data-enter="titleEnter" data-auto="2" data-title="Title" data-speaker="Kait" data-h="0.05" data-drone="0.35"
+<section class="slide" id="title" data-time="25" data-enter="titleEnter" data-auto="2" data-title="Title" data-speaker="Kait" data-h="0.05" data-drone="0.35"
  data-notes="Let the image sit for two seconds. Then: 'This is Spiraling. A first-person dark fantasy horror game with visual-novel dialogue. I'm Kait, this is Katia, she drew everything you are about to see.'">
   <img class="bg kb" src="assets/hero.jpg" alt="">
   <div class="shade-b"></div>
@@ -198,20 +198,19 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 02 WHY -->
-<section class="slide why" id="why" data-auto="1" data-title="Why (Vision)" data-speaker="Kait" data-h="0.1" data-drone="0.4" data-enter="whyEnter"
- data-notes="WHY. Ask it as a real question to the room, pause after each line. Click 1: heart and brain. Click 2: circuit boards. Click 3: the threshold (sting sound). Click 4: the godhood line.">
+<section class="slide why" id="why" data-time="60" data-auto="1" data-title="Why (Vision)" data-speaker="Kait" data-h="0.1" data-drone="0.4" data-enter="whyEnter"
+ data-notes="WHY (1 min). Ask it as a real question, pause after each line. Click 1: heart and brain. Click 2: circuit boards, the Doctor answers. Click 3: the threshold (sting). Then SAY it, it is no longer on screen: To ascend to godhood is to become a perfect, undying machine. Spiraling asks what that costs.">
   <div class="pad">
     <div class="label step">Vision</div>
     <p class="step" style="margin-top:40px">Heart and brain are our main electroconductive organs.</p>
-    <p class="step" style="margin-top:16px">What if you could swap them for circuit boards?</p>
+    <p class="step" style="margin-top:16px" data-do="vo:doctor-pump">What if you could swap them for circuit boards?</p>
     <h1 class="g step" data-do="sfx:sting">Where is the threshold between a human and <em>a machine?</em></h1>
-    <p class="sub step">To ascend to godhood is to become a perfect, undying machine. Spiraling asks what that costs.</p>
   </div>
 </section>
 
 <!-- 03 PREMISE -->
-<section class="slide premise" id="premise" data-auto="2" data-title="The premise (What)" data-speaker="Kait" data-h="0.18" data-drone="0.55"
- data-notes="WHAT, in one breath. Click 2 triggers the facility voice and the glitch. Keep your voice low. 'Death is part of the process' is the line to land.">
+<section class="slide premise" id="premise" data-time="60" data-auto="2" data-title="The premise (What)" data-speaker="Kait" data-h="0.18" data-drone="0.55"
+ data-notes="WHAT (1 min), in one breath. Click 2 triggers the Facility voice and the glitch; let it finish. Then SAY: choose how your body is modified; if you die, you wake in the bag and try again.">
   <video class="bg" src="assets/opening.mp4" muted loop playsinline></video>
   <div class="shade-l"></div>
   <div class="pad">
@@ -219,27 +218,27 @@ body.cursor{cursor:default}
     <h2 class="g step" style="margin-top:34px">You wake in a body bag.</h2>
     <p class="step" style="margin-top:40px">The facility has one instruction:</p>
     <div class="order step" data-do="sfx:glitch;vo:facility-01;shake"><span class="glitch" data-text="BECOME THE PERFECT MACHINE.">BECOME THE PERFECT MACHINE.</span></div>
-    <p class="step">Choose how your body is modified. Every change has a consequence. Death is part of the process: you wake in the bag and try again.</p>
+    <p class="step">Every change has a consequence. Death is part of the process.</p>
   </div>
   <div class="credit">Concept render, not gameplay</div>
 </section>
 
 <!-- 04 USP -->
-<section class="slide usp" id="usp" data-auto="2" data-title="USP" data-speaker="Kait" data-h="0.26" data-drone="0.4"
+<section class="slide usp" id="usp" data-time="75" data-auto="2" data-title="USP" data-speaker="Kait" data-h="0.26" data-drone="0.4"
  data-notes="USP. This is the sentence we want them to remember: your body determines which story you can survive. Then the three pillars, one click each.">
   <div class="pad">
     <div class="label step">Unique selling point</div>
     <h1 class="g step" style="margin-top:30px">Your body determines which story you can survive.</h1>
     <div class="cols">
-      <div class="step"><div class="n">01</div><h3>Modification is the mechanic</h3><p>Each procedure rewrites what you can touch, see and survive. The same live wire kills one body and guides another.</p></div>
-      <div class="step"><div class="n">02</div><h3>Death is the process</h3><p>You always wake in the bag again. Every failure teaches you the facility, and a little of who you were.</p></div>
-      <div class="step"><div class="n">03</div><h3>Humanity is the price</h3><p>The more machine you become, the less human the world feels. Voices, colours and memories drift away.</p></div>
+      <div class="step"><div class="n">01</div><h3>Modification is the mechanic</h3><p>Every procedure changes what you can touch, see and survive.</p></div>
+      <div class="step"><div class="n">02</div><h3>Death is the process</h3><p>You always wake in the bag again, knowing more.</p></div>
+      <div class="step"><div class="n">03</div><h3>Humanity is the price</h3><p>The more machine you become, the less human the world feels.</p></div>
     </div>
   </div>
 </section>
 
 <!-- 05 LOOP -->
-<section class="slide loop" id="loop" data-auto="2" data-title="Core mechanics" data-speaker="Kait" data-h="0.32" data-drone="0.4" data-enter="loopEnter"
+<section class="slide loop" id="loop" data-time="60" data-auto="2" data-title="Core mechanics" data-speaker="Kait" data-h="0.32" data-drone="0.4" data-enter="loopEnter"
  data-notes="HOW. The spiral draws itself. Walk the loop: wake, choose, explore, consequence, return. Then the three branches. End with: 'Let's show you instead.'">
   <div class="pad" style="right:1000px">
     <div class="label step">Core mechanics</div>
@@ -256,7 +255,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 06 CHOICE -->
-<section class="slide" id="choice" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
+<section class="slide" id="choice" data-time="120" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
  data-notes="LIVE. Tell the room: 'You are the patient. Choose.' Katia counts hands. Press 1, 2 or 3 (or click). Eyes = death, then you come back here and they choose again. Heart = memory, then back here. Palms = progress and the deck moves on to Look and feel. If you are short on time press RIGHT to skip ahead to Look and feel.">
   <img class="bg" src="assets/doctor-choice-clean.jpg" alt="" style="object-position:center 30%;filter:brightness(.6) contrast(1.05)">
   <div class="credit" style="top:36px;bottom:auto;left:48px;right:auto">Original concept art: Katia</div>
@@ -273,20 +272,20 @@ body.cursor{cursor:default}
 </section>
 
 <!-- BRANCH: PALMS (progress) -->
-<section class="slide branch" id="b-palms" data-auto="3" data-title="Branch: palms" data-speaker="Kait" data-h="0.44" data-drone="0.45" data-enter="palmsEnter" data-next="look"
+<section class="slide branch" id="b-palms" data-sub="top" data-auto="3" data-title="Branch: palms" data-speaker="Kait" data-h="0.44" data-drone="0.45" data-enter="palmsEnter" data-next="look"
  data-notes="PROGRESS. The palms change, the current hums. 'Now you can touch live wires and feel where the current wants to go. Without the modification, the same wire kills you.'">
   <div class="xfade" id="palmsx"><img src="assets/palms-human.jpg" alt=""><img class="top" src="assets/palms-nano.jpg" alt=""></div>
   <div class="shade-b"></div>
   <div class="outcome">
     <span class="tag progress step">PROGRESS</span>
     <h2 class="g step">You feel where the current wants to go.</h2>
-    <p class="step">Live wires become a path. Without the modification, the same touch is fatal. The route toward the true ending opens.</p>
+    <p class="step">Without the modification, the same touch kills you.</p>
   </div>
   <div class="credit">Original concept art: Katia</div>
 </section>
 
 <!-- BRANCH: EYES (death) -->
-<section class="slide branch" id="b-eyes" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
+<section class="slide branch" id="b-eyes" data-sub="top" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
  data-notes="DEATH. Build it slowly. Click 1: the eye changes. Click 2: 'You can see the power lines through the walls.' Click 3: whiteout. Then advance to death.">
   <div class="xfade" id="eyesx"><img src="assets/eye-human.jpg" alt=""><img class="top" src="assets/eye-modified.jpg" alt=""></div>
   <div class="whiteout" id="whiteout"></div>
@@ -299,7 +298,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- DEATH -->
-<section class="slide branch death" id="death" data-title="Death" data-speaker="Kait" data-h="0.5" data-drone="0" data-enter="deathEnter" data-next="wake"
+<section class="slide branch death" id="death" data-sub="top" data-title="Death" data-speaker="Kait" data-h="0.5" data-drone="0" data-enter="deathEnter" data-next="wake"
  data-notes="Hard cut to black, flatline. Let it ring. Click: the log lines. Click: 'Death is part of the process.' Then advance: zipper, back in the bag.">
   <div id="flat"></div>
   <div class="death-log">
@@ -311,11 +310,11 @@ body.cursor{cursor:default}
 </section>
 
 <!-- WAKE -->
-<section class="slide branch" id="wake" data-auto="1" data-title="Wake again" data-speaker="Kait" data-h="0.52" data-drone="0.55" data-enter="wakeEnter" data-next="choice"
+<section class="slide branch" id="wake" data-sub="top" data-auto="1" data-title="Wake again" data-speaker="Kait" data-h="0.52" data-drone="0.55" data-enter="wakeEnter" data-next="choice"
  data-notes="Zipper opens. 'And you wake up. Again.' Advance to choose again: the dead option is crossed out.">
   <img class="bg kb" src="assets/opening-still.jpg" alt="">
   <div class="shade-b"></div>
-  <div class="outcome"><h2 class="g step">Try again.</h2><p class="step">Same bag. Same doctor. You remember a little more.</p></div>
+  <div class="outcome"><h2 class="g step">Try again.</h2><p class="step">You remember a little more.</p></div>
 </section>
 
 <!-- BRANCH: HEART (revelation) -->
@@ -326,18 +325,18 @@ body.cursor{cursor:default}
   <div class="outcome" style="bottom:auto;top:160px">
     <span class="tag lore step">REVELATION</span>
     <h2 class="g step">The monitor stops. For a moment, you remember.</h2>
-    <p class="step" data-do="vo:doctor-remember">Some procedures do not kill you. They show you who you were before the bag.</p>
+    <p class="step" data-do="vo:doctor-remember">Some procedures show you who you were.</p>
   </div>
   <div class="credit">Original concept art: Katia</div>
 </section>
 
 <!-- 10 LOOK -->
-<section class="slide look" id="look" data-enter="settingEnter" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
+<section class="slide look" id="look" data-time="60" data-enter="settingEnter" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
  data-notes="KATIA. Your section. Talk about the art direction in your own words: stylised, sculptural, drawn texture. Beauty that feels wrong.">
   <div class="pad">
     <div class="label step">Look and feel</div>
     <h1 class="g step" style="margin-top:26px">Beauty that feels wrong.</h1>
-    <p class="desc step">Stylised sculptural 3D with drawn texture. Wet porcelain, cables, surgical light, deep shadow. Black, ivory, surgical red, aged brown.</p>
+    <p class="desc step">Wet porcelain, cables, surgical light, deep shadow.</p>
   </div>
   <div class="gallery step">
     <img src="assets/cable-figure.jpg" alt=""><img src="assets/seated-figure.jpg" alt=""><img src="assets/arm.jpg" alt=""><img src="assets/stairs.jpg" alt=""><img src="assets/perfect-machine.jpg" alt="">
@@ -346,7 +345,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 11 SCOPE + MONETIZATION -->
-<section class="slide" id="scope" data-auto="2" data-title="Scope and monetization" data-speaker="Kait" data-h="0.8" data-drone="0.35"
+<section class="slide" id="scope" data-time="60" data-auto="2" data-title="Scope and monetization" data-speaker="Kait" data-h="0.8" data-drone="0.35"
  data-notes="KAIT. What we build first: one full spiral. Then monetization, the last line gets a laugh if you deliver it dry.">
   <div class="pad scope">
     <div>
@@ -369,13 +368,13 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 12 TRAILER -->
-<section class="slide" id="trailer" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
+<section class="slide" id="trailer" data-time="35" data-title="Concept trailer" data-speaker="Both (silent)" data-h="0.9" data-drone="0.5" data-enter="trailerEnter"
  data-notes="Say nothing. 32 seconds. The deck moves on to the end slide by itself when the video finishes.">
   <video class="bg" id="animatic" src="assets/animatic.mp4" muted playsinline preload="auto" style="object-fit:contain;background:#000"></video>
 </section>
 
 <!-- 13 END -->
-<section class="slide" id="end" data-sub="bottom" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
+<section class="slide" id="end" data-time="25" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
  data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: 'Thank you.' Then questions. Backup slides follow if they ask about death or humanity.">
   <div class="end-line step" data-do="vo:patient-machine">i am a perfect machine.</div>
   <div class="end-logo step" data-do="sfx:boom;flash;hideprev"><img src="assets/logo.png" alt="Spiraling"></div>
@@ -447,7 +446,6 @@ const VO = {
   'facility-death':  { who:'Facility',     text:"Subject deceased. Returning to storage.", fac:true },
   'doctor-again':    { who:'The Doctor',   text:"There you are. Let's try again." },
   'doctor-remember': { who:'The Doctor',   text:"There. Do you remember now? ... Don't worry. It will pass." },
-  'doctor-care':     { who:'The Doctor',   text:"I only want what is best for you." },
   'patient-machine': { who:'You',          text:"i am a perfect machine." },
   'facility-end':    { who:'Facility',     text:"Thank you for your attention. Please return to your bag.", fac:true },
 };
@@ -601,9 +599,11 @@ function vo(id){
   const line = subEl.querySelector('.line'); line.textContent = '';
   subEl.classList.add('on');
   clearInterval(typeTimer); let i = 0;
-  typeTimer = setInterval(() => { line.textContent = v.text.slice(0, ++i); if (i >= v.text.length) clearInterval(typeTimer); }, v.fac ? 28 : 42);
   const f = FILES['vo-' + id];
-  let dur = v.text.length * 65 + 1800;
+  const spoken = (f && isFinite(f.duration)) ? f.duration * 1000 : v.text.length * 55;
+  const step_ = Math.max(18, spoken * 0.9 / v.text.length);   // finish typing just before the voice finishes
+  typeTimer = setInterval(() => { line.textContent = v.text.slice(0, ++i); if (i >= v.text.length) clearInterval(typeTimer); }, step_);
+  let dur = spoken + 1500;
   if (curVO){ curVO.pause(); }
   if (f && !muted){ curVO = f; f.currentTime = 0; f.play().catch(()=>{}); if (isFinite(f.duration)) dur = f.duration * 1000 + 1200; }
   clearTimeout(subTimer); subTimer = setTimeout(() => subEl.classList.remove('on'), dur);
@@ -660,7 +660,7 @@ const ACTIONS = {
   },
   titleEnter(){ sfx('hit'); },
   settingEnter(){ sfx('whoosh', 0.8); },
-  whyEnter(){ later(() => vo('doctor-pump'), 900); },
+  whyEnter(){},
   loopEnter(){ drawSpiral(); later(() => cur.querySelector('#spiral path.sp').classList.add('draw'), 60); },
   choiceEnter(){
     cur.querySelectorAll('.opt').forEach(b => b.classList.toggle('used', used.has(b.dataset.go)));
@@ -769,7 +769,7 @@ function choose(id){
   used.add(id); sfx('glitch'); go(byId(id));
 }
 function start(){
-  initAudio(); AC.resume(); started = true;
+  initAudio(); AC.resume(); started = true; window.talkStart = Date.now();
   byId('hint').style.display = 'none';
   drone(parseFloat(cur.dataset.drone || 0));
   if (cur.id === 'cold') ACTIONS.cold();
@@ -876,11 +876,16 @@ function openPresenter(){
 function updatePresenter(){
   if (!pw || pw.closed || !cur) return;
   const n = nextSlide(); const steps = cur.querySelectorAll('.step').length;
-  const s = Math.floor((Date.now() - t0) / 1000);
+  const s = Math.floor((Date.now() - (window.talkStart || t0)) / 1000);
+  // where we should be: sum of budgets up to and including this section
+  let anchor = main.includes(cur) ? cur : byId('choice'), due = 0;
+  for (const m of main){ due += parseInt(m.dataset.time || 0); if (m === anchor) break; }
+  const fmt = x => String(Math.floor(Math.abs(x)/60)).padStart(2,'0') + ':' + String(Math.abs(x)%60).padStart(2,'0');
+  const diff = s - due, pace = diff > 20 ? `<span style="color:#e55">${fmt(diff)} behind</span>` : diff < -20 ? `<span style="color:#7c7">${fmt(diff)} ahead</span>` : 'on time';
   pw.document.body.innerHTML = `
     <div style="color:#c01a22;letter-spacing:.2em;font-size:13px">NOW · ${cur.dataset.speaker || ''}</div>
     <h2 style="margin:6px 0 4px">${cur.dataset.title}</h2>
-    <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}</div>
+    <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${fmt(s)} of 10:00 · finish this section by ${fmt(due)} · ${pace}</div>
     <p style="font-size:22px;margin-top:18px">${cur.dataset.notes || ''}</p>
     <div style="color:#888;margin-top:24px">NEXT: ${n ? n.dataset.title : (cur.id === 'choice' ? 'press 1 / 2 / 3' : 'end')}</div>
     <div style="color:#555;font-size:13px;margin-top:30px">SPACE next · ← undo click · shift+← previous slide · 1/2/3 choose · S skip to look &amp; feel · Q backup Q&amp;A · M mute · B black · F fullscreen</div>`;
