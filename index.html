@@ -20,10 +20,10 @@ body.cursor{cursor:default}
 .g{font-family:'Grenze Gotisch',serif;font-weight:600;letter-spacing:-.01em;line-height:1.02}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.04em}
 .label{font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
-.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .8s ease,visibility 0s linear .8s}
-.slide.active{opacity:1;visibility:visible;transition:opacity .8s ease}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility 0s linear .5s}
+.slide.active{opacity:1;visibility:visible;transition:opacity .5s ease}
 .slide.cut{transition:none!important}
-.step{opacity:0;transform:translateY(14px);transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.1,1)}
+.step{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .7s cubic-bezier(.2,.7,.1,1)}
 .step.on{opacity:1;transform:none}
 .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .shade-l{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,7,7,.96) 0%,rgba(8,7,7,.82) 38%,rgba(8,7,7,0) 72%)}
@@ -93,7 +93,7 @@ body.cursor{cursor:default}
 /* loop */
 .loop h1{font-size:120px}
 #spiral{position:absolute;right:60px;top:120px;width:1140px;height:860px}
-#spiral path.sp{fill:none;stroke:var(--red);stroke-width:3;stroke-dasharray:4200;stroke-dashoffset:4200;transition:stroke-dashoffset 4.5s cubic-bezier(.4,.1,.2,1)}
+#spiral path.sp{fill:none;stroke:var(--red);stroke-width:3;stroke-dasharray:4200;stroke-dashoffset:4200;transition:stroke-dashoffset 2.6s cubic-bezier(.4,.1,.2,1)}
 .slide.active #spiral path.sp.draw{stroke-dashoffset:0}
 #spiral text{font-family:'JetBrains Mono';font-size:25px;fill:var(--ivory);letter-spacing:.12em}
 #spiral circle{fill:var(--ink);stroke:var(--ivory);stroke-width:3}
@@ -118,7 +118,7 @@ body.cursor{cursor:default}
 .pair{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;background:#000}
 .pair img{width:100%;height:100%;object-fit:contain}
 .xfade{position:absolute;inset:0}
-.xfade img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 2.2s ease}
+.xfade img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 1.2s ease}
 .xfade img.top{opacity:0}
 .xfade.swap img.top{opacity:1}
 .outcome{position:absolute;left:120px;bottom:110px;max-width:1100px}
@@ -126,12 +126,12 @@ body.cursor{cursor:default}
 .outcome p{font-size:32px;color:var(--bone);font-weight:300;margin-top:18px;line-height:1.35}
 .tag{display:inline-block;font-family:'JetBrains Mono';font-size:20px;letter-spacing:.25em;padding:10px 16px;border:1px solid currentColor;margin-bottom:26px}
 .tag.progress{color:#e9e2d4}.tag.death{color:var(--red)}.tag.lore{color:#b89a7c}
-.whiteout{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity 1.6s ease-in}
+.whiteout{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .9s ease-in}
 .whiteout.on{opacity:1}
 /* death */
 .death-log{position:absolute;left:120px;top:140px;font-family:'JetBrains Mono';font-size:32px;line-height:1.9;color:var(--red);letter-spacing:.1em}
 .death h1{position:absolute;left:120px;bottom:130px;font-size:140px;max-width:1500px}
-#flat{position:absolute;left:0;top:50%;width:100%;height:4px;background:var(--red);box-shadow:0 0 18px var(--red);transform:scaleX(0);transform-origin:left;transition:transform 2.6s linear}
+#flat{position:absolute;left:0;top:50%;width:100%;height:4px;background:var(--red);box-shadow:0 0 18px var(--red);transform:scaleX(0);transform-origin:left;transition:transform 1.4s linear}
 .slide.active #flat.on{transform:scaleX(1)}
 /* setting */
 .setting h1{font-size:120px;max-width:760px}
@@ -183,13 +183,13 @@ body.cursor{cursor:default}
 <div id="viewport"><div id="stage">
 
 <!-- 00 COLD OPEN -->
-<section class="slide" id="cold" data-time="30" data-title="Cold open" data-speaker="Kait (lights off)" data-h="0" data-drone="0.5"
+<section class="slide" id="cold" data-time="25" data-title="Cold open" data-speaker="Kait (lights off)" data-h="0" data-drone="0.5"
  data-notes="Lights off if you can. Stand still. Press SPACE once: hiss, heartbeat, then the Doctor wakes the room. Wait for her last line to finish before advancing. Do not speak.">
   <canvas id="ecg" width="1920" height="300"></canvas>
 </section>
 
 <!-- 01 TITLE -->
-<section class="slide" id="title" data-time="25" data-enter="titleEnter" data-auto="2" data-title="Title" data-speaker="Kait" data-h="0.05" data-drone="0.35"
+<section class="slide" id="title" data-time="20" data-enter="titleEnter" data-auto="2" data-title="Title" data-speaker="Kait" data-h="0.05" data-drone="0.35"
  data-notes="Let the image sit for two seconds. Then: 'This is Spiraling. A first-person dark fantasy horror game with visual-novel dialogue. I'm Kait, this is Katia, she drew everything you are about to see.'">
   <img class="bg kb" src="assets/hero.jpg" alt="">
   <div class="shade-b"></div>
@@ -199,7 +199,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 02 WHY -->
-<section class="slide why" id="why" data-time="60" data-auto="1" data-title="Why (Vision)" data-speaker="Kait" data-h="0.1" data-drone="0.4" data-enter="whyEnter"
+<section class="slide why" id="why" data-time="45" data-auto="1" data-title="Why (Vision)" data-speaker="Kait" data-h="0.1" data-drone="0.4" data-enter="whyEnter"
  data-notes="WHY (1 min). Ask it as a real question, pause after each line. Click 1: heart and brain. Click 2: circuit boards, the Doctor answers. Click 3: the threshold (sting). Then SAY it, it is no longer on screen: To ascend to godhood is to become a perfect, undying machine. Spiraling asks what that costs.">
   <div class="pad">
     <div class="label step">Vision</div>
@@ -210,7 +210,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 03 PREMISE -->
-<section class="slide premise" id="premise" style="background:#000" data-time="60" data-auto="2" data-title="The premise (What)" data-speaker="Kait" data-h="0.18" data-drone="0.55"
+<section class="slide premise" id="premise" style="background:#000" data-time="45" data-auto="2" data-title="The premise (What)" data-speaker="Kait" data-h="0.18" data-drone="0.55"
  data-notes="WHAT (1 min), in one breath. Click 2 triggers the Facility voice and the glitch; let it finish. Then SAY: choose how your body is modified; if you die, you wake in the bag and try again.">
   <img class="bg kb" src="assets/perfect-machine-clean.jpg" alt="" style="left:400px;width:1640px;background:#000">
   <div class="shade-l"></div>
@@ -226,7 +226,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 04 USP -->
-<section class="slide usp" id="usp" data-time="75" data-auto="2" data-title="USP" data-speaker="Kait" data-h="0.26" data-drone="0.4"
+<section class="slide usp" id="usp" data-time="60" data-auto="2" data-title="USP" data-speaker="Kait" data-h="0.26" data-drone="0.4"
  data-notes="USP. This is the sentence we want them to remember: your body determines which story you can survive. Then the three pillars, one click each.">
   <div class="pad">
     <div class="label step">Unique selling point</div>
@@ -240,7 +240,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 05 LOOP -->
-<section class="slide loop" id="loop" data-time="60" data-auto="2" data-title="Core mechanics" data-speaker="Kait" data-h="0.32" data-drone="0.4" data-enter="loopEnter"
+<section class="slide loop" id="loop" data-time="45" data-auto="2" data-title="Core mechanics" data-speaker="Kait" data-h="0.32" data-drone="0.4" data-enter="loopEnter"
  data-notes="HOW. The spiral draws itself. Walk the loop: wake, choose, explore, consequence, return. Then the three branches. End with: 'Let's show you instead.'">
   <div class="pad" style="right:1000px">
     <div class="label step">Core mechanics</div>
@@ -257,7 +257,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 06 CHOICE -->
-<section class="slide" id="choice" data-time="120" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
+<section class="slide" id="choice" data-time="90" data-sub="hidden" data-title="Live choice" data-speaker="Kait (Katia counts the room)" data-h="0.38" data-drone="0.6" data-enter="choiceEnter"
  data-notes="LIVE. Tell the room: 'You are the patient. Choose.' Katia counts hands. Press 1, 2 or 3 (or click). Eyes = death, then you come back here and they choose again. Heart = memory, then back here. Palms = progress and the deck moves on to Look and feel. If you are short on time press RIGHT to skip ahead to Look and feel.">
   <img class="bg" src="assets/doctor-choice-clean.jpg" alt="" style="object-position:center 30%;filter:brightness(.6) contrast(1.05)">
   <div class="credit" style="top:36px;bottom:auto;left:48px;right:auto">Original concept art: Katia</div>
@@ -287,7 +287,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- BRANCH: EYES (death) -->
-<section class="slide branch" id="b-eyes" data-sub="top" data-autoplay="6300,8300,10200,12400" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
+<section class="slide branch" id="b-eyes" data-sub="top" data-autoplay="6000,7300,8600,10000" data-title="Branch: eyes" data-speaker="Kait" data-h="0.44" data-drone="0.6" data-enter="eyesEnter" data-next="death"
  data-notes="DEATH. Build it slowly. Click 1: the eye changes. Click 2: 'You can see the power lines through the walls.' Click 3: whiteout. Then advance to death.">
   <div class="xfade" id="eyesx"><img src="assets/eye-human.jpg" alt=""><img class="top" src="assets/eye-modified.jpg" alt=""></div>
   <div class="whiteout" id="whiteout"></div>
@@ -334,7 +334,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 10 LOOK -->
-<section class="slide look" id="look" data-time="60" data-enter="settingEnter" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
+<section class="slide look" id="look" data-time="45" data-enter="settingEnter" data-auto="3" data-title="Look and feel" data-speaker="Katia" data-h="0.72" data-drone="0.4"
  data-notes="KATIA. Your section. Talk about the art direction in your own words: stylised, sculptural, drawn texture. Beauty that feels wrong.">
   <div class="pad">
     <div class="label step">Look and feel</div>
@@ -348,7 +348,7 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 11 SCOPE + MONETIZATION -->
-<section class="slide" id="scope" data-time="60" data-auto="2" data-title="Scope and monetization" data-speaker="Kait" data-h="0.8" data-drone="0.35"
+<section class="slide" id="scope" data-time="45" data-auto="2" data-title="Scope and monetization" data-speaker="Kait" data-h="0.8" data-drone="0.35"
  data-notes="KAIT. What we build first: one full spiral. Then monetization, the last line gets a laugh if you deliver it dry.">
   <div class="pad scope">
     <div>
@@ -371,8 +371,8 @@ body.cursor{cursor:default}
 </section>
 
 <!-- 13 END -->
-<section class="slide" id="end" data-next="credits" data-time="25" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
- data-notes="Click 1: the machine line. Click 2: logo with a boom. Click 3: Wake up again, thank you. Click 4: credits. Click 5: the concept film plays last. Backup Q&amp;A slides: press Q.">
+<section class="slide" id="end" data-next="credits" data-time="0" data-autoplay="400,2700,4300" data-title="End" data-speaker="Both" data-h="1" data-drone="0.3" data-enter="endEnter"
+ data-notes="Plays itself: the machine line, the logo with a boom, then Wake up again, thank you. Stay on it for questions. Next click: credits, then the closing film. Not counted in the 8 minutes. Backup Q&amp;A: press Q.">
   <div class="end-line step" data-do="vo:patient-machine">i am a perfect machine.</div>
   <div class="end-logo step" data-do="sfx:boom;flash;hideprev"><img src="assets/logo.png" alt="Spiraling"></div>
   <div class="end-thanks step" data-do="vo:facility-end"><h2 class="g">Wake up again.</h2><p>Thank you. Questions?</p></div>
@@ -674,13 +674,13 @@ const ACTIONS = {
     byId('vnline').textContent = line;
     later(() => vo(used.size ? 'doctor-again' : 'doctor-choose'), 700);
   },
-  palmsEnter(){ later(() => { byId('palmsx').classList.add('swap'); sfx('buzz'); vo('doctor-palms'); }, 900); },
+  palmsEnter(){ later(() => { byId('palmsx').classList.add('swap'); sfx('buzz'); vo('doctor-palms'); }, 500); },
   eyesEnter(){ byId('eyesx').classList.remove('swap'); byId('whiteout').classList.remove('on'); later(() => vo('doctor-eyes'), 800); },
   deathEnter(){ heartStop(); drone(0); const f = byId('flat'); f.classList.remove('on'); void f.offsetWidth; later(() => { f.classList.add('on'); sfx('flatline'); }, 400); },
   wakeEnter(){ sfx('zipper'); later(() => heartStart(64), 900); },
-  heartEnter(){ heartStop(); later(() => sfx('heartroom'), 300); later(() => { heart.h = Math.min(1, heart.h + 0.25); heartStart(58); }, 3800); },
+  heartEnter(){ heartStop(); later(() => sfx('heartroom'), 300); later(() => { heart.h = Math.min(1, heart.h + 0.25); heartStart(58); }, 2400); },
   trailerEnter(){
-    const v = byId('animatic'); v.muted = true; v.currentTime = 0;
+    const v = byId('animatic'); v.muted = true; v.currentTime = 0; v.playbackRate = 1.25;
     const tryPlay = () => v.play().catch(() => later(tryPlay, 300));
     tryPlay();
     sfx('trailer', 0.9);
@@ -727,7 +727,7 @@ function show(el, opts = {}){
   } else {
     // the first few builds of a slide appear by themselves, so a slide never lands empty
     const auto = Math.min(parseInt(el.dataset.auto || 0), steps.length);
-    for (let i = 0; i < auto; i++){ steps[i].style.transitionDelay = (0.25 + i * 0.35) + 's'; steps[i].classList.add('on'); run(steps[i].dataset.do); }
+    for (let i = 0; i < auto; i++){ steps[i].style.transitionDelay = (0.12 + i * 0.2) + 's'; steps[i].classList.add('on'); run(steps[i].dataset.do); }
     step = auto;
     // data-autoplay="ms,ms,...": the slide advances itself at these times (one entry per click, the last one leaves the slide).
     // Each timer only fires if nobody has clicked past that point already, so pressing space never double-skips.
@@ -872,7 +872,7 @@ function drawSpiral(){
     const c = document.createElementNS(ns, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 11);
     const t = document.createElementNS(ns, 'text'); t.textContent = l; const left = x < cx; t.setAttribute('x', left ? x - 22 : x + 22); t.setAttribute('y', y + 8); t.setAttribute('text-anchor', left ? 'end' : 'start');
     g.append(c, t); svg.append(g);
-    later(() => g.style.opacity = 1, 900 + i * 800);
+    later(() => g.style.opacity = 1, 350 + i * 480);
   });
 }
 
@@ -900,7 +900,7 @@ function updatePresenter(){
   pw.document.body.innerHTML = `
     <div style="color:#c01a22;letter-spacing:.2em;font-size:13px">NOW · ${cur.dataset.speaker || ''}</div>
     <h2 style="margin:6px 0 4px">${cur.dataset.title}</h2>
-    <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${fmt(s)} of 10:00 · finish this section by ${fmt(due)} · ${pace}</div>
+    <div style="color:#888;font-size:14px">click ${step} / ${steps} · ${fmt(s)} of 8:00 · finish this section by ${fmt(due)} · ${pace}</div>
     <p style="font-size:22px;margin-top:18px">${cur.dataset.notes || ''}</p>
     <div style="color:#888;margin-top:24px">NEXT: ${n ? n.dataset.title : (cur.id === 'choice' ? 'press 1 / 2 / 3' : 'end')}</div>
     <div style="color:#555;font-size:13px;margin-top:30px">SPACE next · ← undo click · shift+← previous slide · 1/2/3 choose · S skip to look &amp; feel · Q backup Q&amp;A · M mute · B black · F fullscreen</div>`;
